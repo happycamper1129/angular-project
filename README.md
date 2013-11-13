@@ -6,6 +6,7 @@ http://www.textangular.com
 ###Requirements
 
 1. Angular 1.2.x
+2. Angular Sanitize 1.2.x
 
 ###Optional requirements
 
@@ -27,6 +28,8 @@ http://www.textangular.com
 }
 ```
 4. Have fun!
+ 
+**Important Note:** In it's current state textAngular does not support the use of class or style attributes in the RAW html or in plugins.
 
 ###Setting Options
 
