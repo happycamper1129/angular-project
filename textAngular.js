@@ -90,8 +90,22 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 			htmlEditor: 'form-control'
 		}
 	}, ($rootScope.textAngularOpts != null)? $rootScope.textAngularOpts : {});
+	// deepExtend instead of angular.extend in order to allow easy customization of "display" for default buttons
+	// snatched from: http://stackoverflow.com/a/15311794/2966847
+	function deepExtend(destination, source) {
+		for (var property in source) {
+			if (source[property] && source[property].constructor &&
+				source[property].constructor === Object) {
+				destination[property] = destination[property] || {};
+				arguments.callee(destination[property], source[property]);
+			} else {
+				destination[property] = source[property];
+			}
+		}
+		return destination;
+	}
 	// Setup the default toolbar tools, this way allows the user to add new tools like plugins
-		$rootScope.textAngularTools = angular.extend({
+		$rootScope.textAngularTools = deepExtend({
 		html: {
 			display: "<button type='button' ng-click='action()' ng-class='displayActiveToolClass(active)'>Toggle HTML</button>",
 			action: function() {
@@ -263,7 +277,7 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 				// This must be called within a $apply or the ngModel value will not be updated correctly
 				compileHtml: function(html) {
 					// this refers to the scope
-					var compHtml = angular.element("<div>").append(html).html().replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+					var compHtml = angular.element("<div>").append(html).html().replace(/(class="(.*?)")|(class='(.*?)')/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/style=("|')(.*?)("|')/g, "");
 					if (scope.showHtml === "load") {
 						scope.text = sanitizationWrapper(compHtml);
 						scope.html = sanitizationWrapper(compHtml.replace(/</g, "&lt;"));
@@ -280,23 +294,6 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 					// the default value for updateDisplay is true
 					if (updateDisplay == null) updateDisplay = true;
 					document.execCommand(command, false, opt);
-					// strip out the chrome specific rubbish that gets put in when using lists
-					if(command === 'insertUnorderedList' || command === 'insertOrderedList'){
-						var currentNode = angular.element(window.getSelection().focusNode.parentNode);
-						while(currentNode.attr('style') !== 'font-family: inherit; line-height: 1.428571429;' && !currentNode.attr('contenteditable')) currentNode = currentNode.parent();
-						if(currentNode.attr('style') === 'font-family: inherit; line-height: 1.428571429;' && !currentNode.attr('contenteditable')){
-							// chrome wraps the origional line, if not wrapped already, in the following code: <span style="font-family: inherit; line-height: 1.428571429;">...</span><br>
-							// this code will strip the above out if it has been added
-							if(currentNode[0].tagName === 'SPAN')
-								currentNode.parent().html(angular.element(currentNode).html());
-							// if the text was already wrapped in a b or i or similar then chrome adds the offending style and appends a <br>. This catches that case.
-							else{
-								currentNode.removeAttr('style');
-								var nextNode = currentNode.next();
-								if(nextNode[0].tagName === 'BR') nextNode.remove();
-							}
-						}
-					}
 					// refocus on the shown display element, this fixes a display bug when using :focus styles to outline the box. You still have focus on the text/html input it just doesn't show up
 					if (scope.showHtml)
 						scope.displayElements.text[0].focus();
@@ -370,8 +367,9 @@ textAngular.directive("textAngular", function($compile, $sce, $window, $document
 				if(ngModel.$viewValue === undefined) return;
 				// if the editors aren't focused they need to be updated, otherwise they are doing the updating
 				if (!($document[0].activeElement === scope.displayElements.html[0]) && !($document[0].activeElement === scope.displayElements.text[0])) {
-					scope.text = sanitizationWrapper(ngModel.$viewValue);
-					scope.html = sanitizationWrapper(ngModel.$viewValue.replace(/</g, "&lt;"));
+					var val = ngModel.$viewValue || ''; // in case model is null
+					scope.text = sanitizationWrapper(val);
+					scope.html = sanitizationWrapper(val.replace(/</g, "&lt;"));
 				}
 			};
 			
