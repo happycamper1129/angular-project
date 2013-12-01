@@ -1,7 +1,7 @@
-textAngular v1.1.1
+textAngular
 ===========
 
-Demo: http://www.textangular.com
+http://www.textangular.com
 
 ###Requirements
 
@@ -15,10 +15,9 @@ Demo: http://www.textangular.com
 
 ###How to Use
 
-1. Get textAngular via `bower install textAngular`, using the cdn at http://cdnjs.cloudflare.com/ajax/libs/textAngular/1.1.1/text-angular.min.js or from the github page https://github.com/fraywing/textAngular
-2. Include textAngular.js or textAngular.min.js in your project then include it in your module: ```angular.module('myModule', ['textAngular'])```, alternatively grab all this code and throw it in your directives.js module file.
-3. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ng-model which is the variable to bind the content of the editor to, like so: ```<div text-angular ng-model="html"></div>``` or ```<text-angular ng-model="html"/>``` this acts in a similar fashion to the input directive of angular so if you define a name attribute you can use form validation as if it was a regular input.
-4. I recommend using the following CSS in your stylesheet or a variant of to display the text box nicely: 
+1. Include textAngular.js or textAngular.min.js in your project then include it in your module: ```angular.module('myModule', ['textAngular'])```, alternatively grab all this code and throw it in your directives.js module file.
+2. In your HTML instantiate textAngular as an attribute or element, the only required attribute is the ng-model which is the variable to bind the content of the editor to, like so: ```<div text-angular ng-model="html"></div>``` or ```<text-angular ng-model="html"/>``` this acts in a similar fashion to the input directive of angular so if you define a name attribute you can use form validation as if it was a regular input.
+3. I recommend using the following CSS in your stylesheet or a variant of to display the text box nicely: 
 
 ```css
 .ta-editor{
@@ -29,9 +28,9 @@ Demo: http://www.textangular.com
     font-size: 100%;
 }
 ```
-Have fun!
+4. Have fun!
  
-**Important Note:** textAngular supports the use of all attributes, please note that angulars ng-bind-html WILL strip out all of your style attributes.
+**Important Note:** In it's current state textAngular does not support the use of class or style attributes in the RAW html or in plugins.
 
 ###Setting Options
 
@@ -73,7 +72,6 @@ $rootScope.textAngularTools.colourRed = {
 	},
 	activeState: function(){return false;} //This isn't required, and currently doesn't work reliably except for the html tag that doesn't rely on the cursor position.
 };
-
 //the following adds it to the toolbar to be displayed and used.
 $rootScope.textAngularOpts.toolbar = [['h1', 'h2', 'h3', 'p', 'pre', 'bold', 'colourRed', 'italics', 'ul', 'ol', 'redo', 'undo', 'clear'],['html', 'insertImage', 'insertLink']];
 ```
@@ -108,8 +106,6 @@ Special thanks to all the contributions thus far!
 Including those from:
 
 [SimeonC](https://github.com/SimeonC)
-
-[Slobodan Mišković](https://github.com/slobo)
 
 [edouard-lopez](https://github.com/edouard-lopez)
 
