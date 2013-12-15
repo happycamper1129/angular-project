@@ -1,9 +1,5 @@
 ###Changelog
 
-2013-12-11 v1.1.2
-
-- Updated to work correctly with IE (console.log bug)
-
 2013-12-11 v1.1.2-pre3
 
 - Added support for .focussed class and ng-focus to allow dynamic styling on focus events. #47
