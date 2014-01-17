@@ -226,7 +226,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 		scope: {},
 		restrict: "EA",
 		link: function(scope, element, attrs, ngModel) {
-			var group, groupElement, keydown, keyup, tool, toolElement; //all these vars should not be accessable outside this directive
+			var group, groupElement, keydown, keyup, mouseup, tool, toolElement; //all these vars should not be accessable outside this directive
 			// get the settings from the defaults and add our specific functions that need to be on the scope
 			angular.extend(scope, $rootScope.textAngularOpts, {
 				// wraps the selection in the provided tag / execCommand function.
@@ -383,7 +383,7 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 						}
 					}
 				}
-				if (this.bUpdateSelectedStyles) $timeout(this.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
+				if (scope.bUpdateSelectedStyles) $timeout(scope.updateSelectedStyles, 200); // used to update the active state when a key is held down, ie the left arrow
 			};
 			// start updating on keydown
 			keydown = function(e) {
@@ -441,30 +441,16 @@ textAngular.directive("textAngular", ['$compile', '$window', '$document', '$root
 				});
 			}
 			
-			//prevents the errors occuring when we are typing in html code
-			function trySanitize(unsafe, oldsafe) {
-				// any exceptions (lets say, color for example) should be made here but with great care
-				var safe;
-				try {
-					safe = $sanitize(unsafe);
-				} catch (e) {
-					safe = oldsafe || '';
+			ngModel.$parsers.push(function(value){
+				// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
+				if(ngModel.$oldViewValue === undefined) ngModel.$oldViewValue = value;
+				try{
+					$sanitize(value); // this is what runs when ng-bind-html is used on the variable
+				}catch(e){
+					return ngModel.$oldViewValue; //prevents the errors occuring when we are typing in html code
 				}
-				return safe;
-			}
-
-			// all the code here takes the information from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
-			ngModel.$parsers.push(function(unsafe) {
-				
-				// this is what runs when ng-bind-html is used on the variable
-				var safe = ngModel.$oldViewValue = trySanitize(unsafe, ngModel.$oldViewValue);
-				return safe;
-			});
-
-			// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
-			ngModel.$formatters.push(function(unsafe) {
-				var safe = trySanitize(unsafe, '');
-				return safe;
+				ngModel.$oldViewValue = value;
+				return value;
 			});
 			
 			// changes to the model variable from outside the html/text inputs
