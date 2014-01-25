@@ -43,7 +43,7 @@ If you find something, please let me know - throw me a message, or submit a issu
 
 ## Developer Notes
 
-I generate the minified file using `uglify-js2`, to install run `npm install -g uglifyjs`. Then to minify the file run (on UNIX based command prompt, this may differ for windows computers): `uglifyjs -m -c unsafe:true textAngular.js > textAngular.min.js`
+I generate the minified file using `uglify-js2`, to install run `npm install -g uglify-js`. Then to minify the file run (on UNIX based command prompt, this may differ for windows computers): `uglifyjs -m -v textAngular.js > textAngular.min.js`
 Any pull request must have the new version of the minified file.
 
 ## License
@@ -58,12 +58,7 @@ Special thanks to all the contributions thus far!
 Including those from:
 
 * [SimeonC](https://github.com/SimeonC)
-* [slobo](https://github.com/slobo)
+* [Slobodan Mišković](https://github.com/slobo)
 * [edouard-lopez](https://github.com/edouard-lopez)
 * [108ium](https://github.com/108ium)
 * [nadeeshacabral](https://github.com/nadeeshacabral) 
-* [netbubu17](https://github.com/netbubu17)
-* [worldspawn](https://github.com/worldspawn)
-* [JonathanGawrych](https://github.com/JonathanGawrych)
-* [kanakiyajay](https://github.com/kanakiyajay)
-* [kencaron](https://github.com/kencaron)
