@@ -10,9 +10,8 @@ Demo is available at: http://www.textangular.com
 
 ### Optional requirements
 
-1. [Bootstrap 3.x](http://getbootstrap.com/) for the default styles
-2. [Font-Awesome 4.x](http://fortawesome.github.io/Font-Awesome/) for the default icons on the toolbar
-3. [Rangy 1.x](https://code.google.com/p/rangy/) for better activeState detection and more dynamic plugins, also the selectionsaverestore module.
+1. `Bootstrap 3.x` for the default styles
+2. `Font-Awesome 4.x` for the default icons on the toolbar
 
 ### Usage
 
@@ -44,7 +43,8 @@ If you find something, please let me know - throw me a message, or submit a issu
 
 ## Developer Notes
 
-When checking out, you need a node.js installation, running `npm install` will get you setup with everything to run the unit tests and minification.
+I generate the minified file using `uglify-js2`, to install run `npm install -g uglifyjs`. Then to minify the file run (on UNIX based command prompt, this may differ for windows computers): `uglifyjs -m -v textAngular.js > textAngular.min.js`
+Any pull request must have the new version of the minified file.
 
 ## License
 
@@ -58,14 +58,7 @@ Special thanks to all the contributions thus far!
 Including those from:
 
 * [SimeonC](https://github.com/SimeonC)
-* [slobo](https://github.com/slobo)
+* [Slobodan Mišković](https://github.com/slobo)
 * [edouard-lopez](https://github.com/edouard-lopez)
 * [108ium](https://github.com/108ium)
 * [nadeeshacabral](https://github.com/nadeeshacabral) 
-* [netbubu17](https://github.com/netbubu17)
-* [worldspawn](https://github.com/worldspawn)
-* [JonathanGawrych](https://github.com/JonathanGawrych)
-* [kanakiyajay](https://github.com/kanakiyajay)
-* [kencaron](https://github.com/kencaron)
-* [gintau](https://github.com/gintau)
-* [uxtx](https://github.com/uxtx)
