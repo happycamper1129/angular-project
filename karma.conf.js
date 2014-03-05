@@ -8,7 +8,7 @@ module.exports = function (config) {
 		plugins: [
 			'karma-jasmine',
 			'karma-chrome-launcher',
-			'karma-phantomjs-launcher',
+			'karma-firefox-launcher',
 			'karma-coverage'
 		],
 		
@@ -29,11 +29,7 @@ module.exports = function (config) {
 		],
 
 		preprocessors: {
-			'**/textAngular.js': ['coverage']
-		},
-		coverageReporter: {
-			type : 'html',
-			dir : 'coverage/'
+			'textAngular.js': ['coverage']
 		},
 
 		// test results reporter to use

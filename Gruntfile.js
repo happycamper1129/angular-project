@@ -8,12 +8,12 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-karma');
 	
 	// Default task.
-	grunt.registerTask('default', ['uglify', 'clean', 'test']);
-	grunt.registerTask('test', ['jshint', 'karma', 'coverage']);
+	grunt.registerTask('default', ['uglify','test']);
+	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
-		var travisOptions = process.env.TRAVIS && { browsers: ['PhantomJS'], reporters: ['dots','coverage'] };
+		var travisOptions = process.env.TRAVIS && { browsers: ['Firefox'], reporters: 'dots' };
 		return grunt.util._.extend(options, customOptions, travisOptions);
 	};
 	
