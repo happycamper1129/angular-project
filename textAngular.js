@@ -9,82 +9,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 
 (function(){ // encapsulate all variables so they don't become global vars
 	"Use Strict";
-	// IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
-	// We need this as IE sometimes plays funny tricks with the contenteditable.
-	// ----------------------------------------------------------
-	// If you're not in IE (or IE version is less than 5) then:
-	// ie === undefined
-	// If you're in IE (>=5) then you can determine which version:
-	// ie === 7; // IE7
-	// Thus, to detect IE:
-	// if (ie) {}
-	// And to detect the version:
-	// ie === 6 // IE6
-	// ie > 7 // IE8, IE9, IE10 ...
-	// ie < 9 // Anything less than IE9
-	// ----------------------------------------------------------
-	/* istanbul ignore next: untestable browser check */
-	var ie = (function(){
-		var undef,rv = -1; // Return value assumes failure.
-		var ua = window.navigator.userAgent;
-		var msie = ua.indexOf('MSIE ');
-		var trident = ua.indexOf('Trident/');
-		
-		if (msie > 0) {
-			// IE 10 or older => return version number
-			rv = parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
-		} else if (trident > 0) {
-			// IE 11 (or newer) => return version number
-			var rvNum = ua.indexOf('rv:');
-			rv = parseInt(ua.substring(rvNum + 3, ua.indexOf('.', rvNum)), 10);
-		}
-		
-		return ((rv > -1) ? rv : undef);
-	}());
-	
-	/*
-		Custom stylesheet for the placeholders rules.
-		Credit to: http://davidwalsh.name/add-rules-stylesheets
-	*/
-	var sheet = (function() {
-		// Create the <style> tag
-		var style = document.createElement("style");
-		
-		// Add a media (and/or media query) here if you'd like!
-		// style.setAttribute("media", "screen")
-		// style.setAttribute("media", "@media only screen and (max-width : 1024px)")
-		
-		// WebKit hack :(
-		style.appendChild(document.createTextNode(""));
-		
-		// Add the <style> element to the page
-		document.head.appendChild(style);
-		
-		return style.sheet;
-	})();
-	
-	// use as: addCSSRule(document.styleSheets[0], "header", "float: left");
-	function addCSSRule(selector, rules) {
-		/* istanbul ignore else: untestable IE option */
-		if(sheet.insertRule) {
-			sheet.insertRule(selector + "{" + rules + "}");
-		}
-		else {
-			sheet.addRule(selector, rules);
-		}
-		// return the index of the stylesheet rule
-		return sheet.rules.length - 1;
-	}
-	
-	function removeCSSRule(index){
-		/* istanbul ignore else: untestable IE option */
-		if(sheet.removeRule){
-			sheet.removeRule(index);
-		}else{
-			sheet.deleteRule(index);
-		}
-	}
-	
 	var textAngular = angular.module("textAngular", ['ngSanitize']); //This makes ngSanitize required
 	
 	// Here we set up the global display defaults, to set your own use a angular $provider#decorator.
@@ -93,7 +17,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
 			['bold', 'italics', 'underline', 'ul', 'ol', 'redo', 'undo', 'clear'],
 			['justifyLeft','justifyCenter','justifyRight'],
-			['html', 'insertImage', 'insertLink', 'unlink']
+			['html', 'insertImage', 'insertLink', 'insertVideo',  'unlink']
 		],
 		classes: {
 			focussed: "focussed",
@@ -353,6 +277,19 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				}
 			}
 		});
+		taRegisterTool('insertVideo', {
+			iconclass: 'fa fa-picture-o', // no predecided class for insert video as of now. 
+			action: function(){
+				var urlPrompt;
+				urlPrompt = prompt("Please enter a youtube URL to embed", 'http://');
+				if (urlPrompt !== '') {
+					console.log(urlPrompt);
+					var urlReplace = urlPrompt.replace("http://www.youtube.com/watch?v=", "http://www.youtube.com/embed/");
+					 var embed = '<div style="padding:20px"><iframe src="'+urlReplace+'" allowfullscreen="true" width="300" frameborder="0" height="250"></iframe></div>';
+					return this.$parent.wrapSelection('inserthtml',   embed);
+				}
+			}
+		});		
 		taRegisterTool('insertLink', {
 			iconclass: 'fa fa-link',
 			action: function(){
@@ -431,13 +368,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					scope.setup.htmlEditorSetup(scope.displayElements.html);
 					scope.setup.textEditorSetup(scope.displayElements.text);
 					scope.displayElements.html.attr({
-						'id': 'taHtmlElement' + _serial,
+						'id': 'taHtmlElement',
 						'ng-show': 'showHtml',
 						'ta-bind': 'ta-bind',
 						'ng-model': 'html'
 					});
 					scope.displayElements.text.attr({
-						'id': 'taTextElement' + _serial,
+						'id': 'taTextElement',
 						'contentEditable': 'true',
 						'ng-hide': 'showHtml',
 						'ta-bind': 'ta-bind',
@@ -480,9 +417,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					$compile(scope.displayElements.text)(scope);
 					$compile(scope.displayElements.html)(scope);
 					
-					scope.updateTaBindtaTextElement = scope['updateTaBindtaTextElement' + _serial];
-					scope.updateTaBindtaHtmlElement = scope['updateTaBindtaHtmlElement' + _serial];
-					
 					// add the classes manually last
 					element.addClass("ta-root");
 					scope.displayElements.text.addClass("ta-text ta-editor " + scope.classes.textEditor);
@@ -507,7 +441,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						_savedSelection = false;
 						scope.updateSelectedStyles();
 						// only update if in text or WYSIWYG mode
-						if(!scope.showHtml) scope['updateTaBindtaTextElement' + _serial]();
+						if(!scope.showHtml) scope.updateTaBindtaTextElement();
 					};
 					
 					// note that focusout > focusin is called everytime we click a button - except bad support: http://www.quirksmode.org/dom/events/blurfocus.html
@@ -573,7 +507,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							}
 							scope.displayElements.forminput.val(ngModel.$viewValue);
 							// if the editors aren't focused they need to be updated, otherwise they are doing the updating
-							/* istanbul ignore else: don't care */
 							if(document.activeElement !== scope.displayElements.html[0] && document.activeElement !== scope.displayElements.text[0]){
 								// catch model being null or undefined
 								scope.html = ngModel.$viewValue || '';
@@ -585,10 +518,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						scope.html = _originalContents;
 					}
 					
-					// changes from taBind back up to here
 					scope.$watch('html', function(newValue, oldValue){
 						if(newValue !== oldValue){
-							if(attrs.ngModel && ngModel.$viewValue !== newValue) ngModel.$setViewValue(newValue);
+							if(attrs.ngModel) ngModel.$setViewValue(newValue);
 							scope.displayElements.forminput.val(newValue);
 						}
 					});
@@ -630,7 +562,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					};
 					// start updating on keydown
 					_keydown = function(){
-						/* istanbul ignore else: don't run if already running */
 						if(!scope._bUpdateSelectedStyles){
 							scope._bUpdateSelectedStyles = true;
 							scope.$apply(function(){
@@ -650,7 +581,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					_keypress = function(event){
 						scope.$apply(function(){
 							if(_toolbars.sendKeyCommand(event)){
-								/* istanbul ignore else: don't run if already running */
 								if(!scope._bUpdateSelectedStyles){
 									scope.updateSelectedStyles();
 								}
@@ -685,11 +615,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isContentEditable = element.attr('contenteditable') !== undefined && element.attr('contenteditable');
 				var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
 				var _isReadonly = false;
-				var _focussed = false;
-				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
-				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
-				/* istanbul ignore next: ie specific test */
-				var _defaultVal = (ie === undefined)? '<p><br></p>' : '<p></p>';
 				// in here we are undoing the converts used elsewhere to prevent the < > and & being displayed when they shouldn't in the code.
 				var _compileHtml = function(){
 					if(_isContentEditable) return element[0].innerHTML;
@@ -719,36 +644,25 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					}else{
 						// all the code specific to contenteditable divs
 						element.on('keyup', function(){
-							if(!_isReadonly){
-								ngModel.$setViewValue(_compileHtml());
-							}
+							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 						});
 						
 						element.on('blur', function(){
-							_focussed = false;
 							var val = _compileHtml();
-							/* istanbul ignore else: if readonly don't update model */
-							if(!_isReadonly){
-								if(val === _defaultVal) ngModel.$setViewValue('');
-								else ngModel.$setViewValue(_compileHtml());
-							}
+							if(val === '' && element.attr("placeholder")) element.addClass('placeholder-text');
+							if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
 							ngModel.$render();
 						});
 						
-						if(attrs.placeholder){
-							var ruleIndex;
-							if(attrs.id) ruleIndex = addCSSRule('#' + attrs.id + '.placeholder-text:before', 'content: "' + attrs.placeholder + '"');
-							else throw('textAngular Error: An unique ID is required for placeholders to work');
-							
-							scope.$on('$destroy', function(){
-								removeCSSRule(ruleIndex);
+						// if is not a contenteditable the default placeholder logic can work - ie the HTML value itself
+						if (element.attr("placeholder")) {
+							// we start off not focussed on this element
+							element.addClass('placeholder-text');
+							element.on('focus', function(){
+								element.removeClass('placeholder-text');
+								ngModel.$render();
 							});
 						}
-						
-						element.on('focus', function(){
-							_focussed = true;
-							ngModel.$render();
-						});
 					}
 				}
 				
@@ -765,28 +679,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				
 				// changes to the model variable from outside the html/text inputs
 				ngModel.$render = function(){
-					// catch model being null or undefined
-					var val = ngModel.$viewValue || '';
 					// if the editor isn't focused it needs to be updated, otherwise it's receiving user input
 					if(document.activeElement !== element[0]){
-						// Not focussed
+						// catch model being null or undefined
+						var val = ngModel.$viewValue || '';
 						if(_isContentEditable){
 							// WYSIWYG Mode
-							if(attrs.placeholder){
-								if(val === ''){
-									// blank
-									if(_focussed) element.removeClass('placeholder-text');
-									else element.addClass('placeholder-text');
-									element[0].innerHTML = _defaultVal;
-								}else{
-									// not-blank
-									element.removeClass('placeholder-text');
-									element[0].innerHTML = val;
-								}
-							}else{
-								if(val === '') element[0].innerHTML = _defaultVal;
-								else element[0].innerHTML = val;
-							}
+							if (val === '' && element.attr('placeholder') && element.hasClass('placeholder-text'))
+									element[0].innerHTML = element.attr('placeholder');
+							else element[0].innerHTML = val;
 							// if in WYSIWYG and readOnly we kill the use of links by clicking
 							if(!_isReadonly) element.find('a').on('click', function(e){
 								e.preventDefault();
@@ -798,12 +699,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}else{
 							// only for input and textarea inputs
 							element.val(val);
-						}
-					}else{
-						/* istanbul ignore else: in other cases we don't care */
-						if(_isContentEditable){
-							// element is focussed, test for placeholder
-							element.removeClass('placeholder-text');
 						}
 					}
 				};
@@ -1247,7 +1142,6 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			refreshEditor: function(name){
 				if(editors[name]){
 					editors[name].scope.updateTaBindtaTextElement();
-					/* istanbul ignore else: phase catch */
 					if(!editors[name].scope.$$phase) editors[name].scope.$digest();
 				}else throw('textAngular Error: No Editor with name "' + name + '" exists');
 			}

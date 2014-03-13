@@ -335,55 +335,35 @@ describe('textAngular', function(){
 		}));
 		describe('should start with', function () {
 			it('pristine', function(){
-				expect($rootScope.form.$pristine).toBe(true);
+				expect($rootScope.form.$pristine);
 			});
 			it('not dirty', function(){
-				expect($rootScope.form.$dirty).toBe(false);
+				expect(!$rootScope.form.$dirty);
 			});
 			it('field pristine', function(){
-				expect($rootScope.form.test.$pristine).toBe(true);
+				expect($rootScope.form.test.$pristine);
 			});
 			it('field not dirty', function(){
-				expect($rootScope.form.test.$dirty).toBe(false);
+				expect(!$rootScope.form.test.$dirty);
 			});
 		});
 		
-		describe('should NOT change on direct model change', function () {
+		describe('should update', function () {
 			beforeEach(function(){
 				$rootScope.htmlcontent = '<div>Test Change Content</div>';
 				$rootScope.$digest();
 			});
 			it('pristine', function(){
-				expect($rootScope.form.$pristine).toBe(true);
+				expect(!$rootScope.form.$pristine);
 			});
 			it('not dirty', function(){
-				expect($rootScope.form.$dirty).toBe(false);
+				expect($rootScope.form.$dirty);
 			});
 			it('field pristine', function(){
-				expect($rootScope.form.test.$pristine).toBe(true);
+				expect(!$rootScope.form.test.$pristine);
 			});
 			it('field not dirty', function(){
-				expect($rootScope.form.test.$dirty).toBe(false);
-			});
-		});
-		
-		describe('should change on input update', function () {
-			beforeEach(function(){
-				element.find('.ta-text').html('<div>Test Change Content</div>');
-				element.find('.ta-text').triggerHandler('keyup');
-				$rootScope.$digest();
-			});
-			it('not pristine', function(){
-				expect($rootScope.form.$pristine).toBe(false);
-			});
-			it('dirty', function(){
-				expect($rootScope.form.$dirty).toBe(true);
-			});
-			it('field not pristine', function(){
-				expect($rootScope.form.test.$pristine).toBe(false);
-			});
-			it('field dirty', function(){
-				expect($rootScope.form.test.$dirty).toBe(true);
+				expect($rootScope.form.test.$dirty);
 			});
 		});
 	});
@@ -525,14 +505,14 @@ describe('textAngular', function(){
 			$rootScope.htmlcontent = undefined;
 			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+			expect(jQuery('.ta-text', element).html()).toBe('');
 		}));
 		
 		it('should handle initial null to empty-string', inject(function ($compile, $rootScope) {
 			$rootScope.htmlcontent = null;
 			var element = $compile('<text-angular name="test" ng-model="htmlcontent"></text-angular>')($rootScope);
 			$rootScope.$digest();
-			expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+			expect(jQuery('.ta-text', element).html()).toBe('');
 		}));
 		
 		it('should handle initial undefined to originalContents', inject(function ($compile, $rootScope) {
@@ -556,7 +536,7 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				$rootScope.htmlcontent = undefined;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+				expect(jQuery('.ta-text', element).html()).toBe('');
 			}));
 			
 			it('from null to empty-string', inject(function ($compile, $rootScope) {
@@ -565,7 +545,7 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				$rootScope.htmlcontent = null;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+				expect(jQuery('.ta-text', element).html()).toBe('');
 			}));
 			
 			it('from undefined to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope) {
@@ -574,7 +554,7 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				$rootScope.htmlcontent = undefined;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+				expect(jQuery('.ta-text', element).html()).toBe('');
 			}));
 			
 			it('from null to blank/emptystring WITH originalContents', inject(function ($compile, $rootScope) {
@@ -583,7 +563,7 @@ describe('textAngular', function(){
 				$rootScope.$digest();
 				$rootScope.htmlcontent = null;
 				$rootScope.$digest();
-				expect(jQuery('.ta-text', element).html()).toBe('<p><br></p>');
+				expect(jQuery('.ta-text', element).html()).toBe('');
 			}));
 		});
 	});
