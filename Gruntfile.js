@@ -6,15 +6,14 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-istanbul-coverage');
 	grunt.loadNpmTasks('grunt-karma');
-	grunt.loadNpmTasks('grunt-karma-coveralls');
 	
 	// Default task.
-	grunt.registerTask('default', ['uglify', 'clean', 'test']);
-	grunt.registerTask('test', ['jshint', 'karma', 'coverage', 'coveralls']);
+	grunt.registerTask('default', ['uglify','test']);
+	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	
 	var testConfig = function (configFile, customOptions) {
 		var options = { configFile: configFile, keepalive: true };
-		var travisOptions = process.env.TRAVIS && { browsers: ['PhantomJS'], reporters: ['dots','coverage'] };
+		var travisOptions = process.env.TRAVIS && { browsers: ['Firefox'], reporters: 'dots' };
 		return grunt.util._.extend(options, customOptions, travisOptions);
 	};
 	
@@ -23,21 +22,23 @@ module.exports = function (grunt) {
 		clean: ["coverage/*.json"],
 		coverage: {
 		  options: {
+		  	/*
+			For When https://github.com/karma-runner/karma-coverage/pull/67 is implemented and istanbul can ignore code blocks	
 			thresholds: {
 			  'statements': 100,
-			  'branches': 98,
+			  'branches': 100,
+			  'lines': 100,
+			  'functions': 100
+			},
+		  	*/
+			thresholds: {
+			  'statements': 99,
+			  'branches': 96,
 			  'lines': 100,
 			  'functions': 100
 			},
 			dir: 'coverage/'
 		  }
-		},
-		coveralls: {
-			options: {
-				debug: true,
-				coverage_dir: 'coverage',
-				force: true
-			}
 		},
 		karma: {
 		  unit: {
