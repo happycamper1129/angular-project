@@ -268,13 +268,6 @@ describe('textAngularManager', function(){
 							return this.$element.attr('hit-this', 'true');
 						}
 					});
-					taRegisterTool('unused', {
-						buttontext: 'Button Is Not Used',
-						action: function(){
-							throw('Error Should Not Run');
-						},
-						commandKeyCode: 42
-					});
 					taOptions.toolbar = [['noactivestate','activeonrangyrange','inactiveonrangyrange']];
 					$rootScope = _$rootScope_;
 					element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
@@ -323,12 +316,6 @@ describe('textAngularManager', function(){
 						editorScope.editorFunctions.sendKeyCommand({ctrlKey: true, which: 21});
 						$rootScope.$digest();
 						expect(element.find('.ta-toolbar button[name=activeonrangyrange]').attr('hit-this')).toBe('true');
-					});
-					
-					it('should do nothing if button not added', function(){
-						expect(function(){
-							editorScope.editorFunctions.sendKeyCommand({ctrlKey: true, which: 42});
-						}).not.toThrow();
 					});
 				});
 			});
