@@ -37,10 +37,9 @@ Include script tags similar to the following:
 
 **Via jsDelivr:**
 
-Include script tags similar to the following:
+Include script tag similar to the following: (For details on how this works see: [https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request](https://github.com/jsdelivr/jsdelivr#load-multiple-files-with-single-http-request))
 ```html
-<script src='//cdn.jsdelivr.net/angular.textangular/1.2.0/textAngular-sanitize.min.js'></script>
-<script src='//cdn.jsdelivr.net/angular.textangular/1.2.0/textAngular.min.js'></script>
+<script src='http://cdn.jsdelivr.net/g/angular.textangular@1.2.0(textAngular-sanitize.min.js+textAngular.min.js)'></script>
 ```
 
 **Via Github**
@@ -61,7 +60,7 @@ Download the code from [https://github.com/fraywing/textAngular/releases/latest]
 ```
 OR
 ```html
-<text-angular ng-model="htmlVariable"></div>
+<text-angular ng-model="htmlVariable"></text-angular>
 ```
 This acts similar to a regular AngularJS / form input if you give it a name attribute, allowing for form submission and AngularJS form validation.
 
