@@ -195,12 +195,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					restoreSelection is only defined if the rangy library is included and it can be called as `restoreSelection()` to restore the users
 					selection in the WYSIWYG editor.
 			display: [string]?
-					Optional, an HTML element to be displayed as the buton. The `scope` of the button is the tool definition object with some additional functions
+					Optional, an HTML element to be displayed as the button. The `scope` of the button is the tool definition object with some additional functions
 					If set this will cause buttontext and iconclass to be ignored
 			buttontext: [string]?
 					if this is defined it will replace the contents of the element contained in the `display` element
 			iconclass: [string]?
 					if this is defined an icon (<i>) will be appended to the `display` element with this string as it's class
+			tooltiptext: [string]?
+					Optional, a plain text description of the action, used for the title attribute of the action button in the toolbar by default.
 			activestate: [function(commonElement)]?
 					this function is called on every caret movement, if it returns true then the class taOptions.classes.toolbarButtonActive
 					will be applied to the `display` element, else the class will be removed
@@ -730,8 +732,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			else return (ie <= 8)? tag.toUpperCase() : tag;
 		};
 	}]).factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
-		var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/ig;
-		var LISTELEMENTS = /^(ul|li|ol)$/ig;
+		var BLOCKELEMENTS = /(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)/ig;
+		var LISTELEMENTS = /(ul|li|ol)/ig;
 		var listToDefault = function(listElement, defaultWrap){
 			var $target;
 			// if all selected then we should remove the list
@@ -752,7 +754,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 		var childElementsToList = function(elements, listElement, newListTag){
 			var html = '';
-			for(i = 0; i < elements.length; i++){
+			for(i = elements.length - 1; i >= 0; i--){
 				html += '<' + taBrowserTag('li') + '>' + elements[i].innerHTML + '</' + taBrowserTag('li') + '>';
 			}
 			var $target = angular.element('<' + newListTag + '>' + html + '</' + newListTag + '>');
@@ -787,13 +789,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(tagName === 'ol' || tagName === 'ul'){
 								return listToList($selected, selfTag);
 							}else{
-								var childBlockElements = false;
-								angular.forEach($selected.children(), function(elem){
-									if(elem.tagName.match(BLOCKELEMENTS)) {
-										childBlockElements = true;
-									}
-								});
-								if(childBlockElements){
+								if(selectedElement.innerHTML.match(BLOCKELEMENTS)){
 									return childElementsToList($selected.children(), $selected, selfTag);
 								}else{
 									return childElementsToList(angular.element('<div>' + selectedElement.innerHTML + '</div>'), $selected, selfTag);
@@ -827,8 +823,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
 						}
-					}else if(command.toLowerCase() === 'formatblock'){
-						var optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
+					}else if(command.toLowerCase() === 'formatblock' && 'blockquote' === options.toLowerCase().replace(/[<>]/ig, '')){
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
 						// find the first blockElement
@@ -836,7 +831,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							$target = $target.parent();
 							tagName = $target[0].tagName.toLowerCase();
 						}
-						if(tagName === optionsTagName){
+						if(tagName === options.toLowerCase().replace(/[<>]/ig, '')){
 							// $target is wrap element
 							_nodes = $target.children();
 							var hasBlock = false;
@@ -854,7 +849,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								$target.remove();
 								$target = defaultWrapper;
 							}
-						}else if($target.parent()[0].tagName.toLowerCase() === optionsTagName && !$target.parent().hasClass('ta-bind')){
+						}else if($target.parent()[0].tagName.toLowerCase() === options.toLowerCase().replace(/[<>]/ig, '') && !$target.parent().hasClass('ta-bind')){
 							//unwrap logic for parent
 							var blockElement = $target.parent();
 							var contents = blockElement.contents();
@@ -875,44 +870,21 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// default wrap behaviour
 							_nodes = taSelection.getOnlySelectedElements();
 							if(_nodes.length === 0) _nodes = [$target[0]];
-							// find the parent block element if any of the nodes are inline or text
-							var inlineNodePresent = false;
-							angular.forEach(_nodes, function(node){
-								if(node.nodeType === 3 || !node.tagName.match(BLOCKELEMENTS)){
-									inlineNodePresent = true;
+							html = '';
+							if(_nodes.length === 1 && _nodes[0].nodeType === 3){
+								var _node = _nodes[0].parentNode;
+								while(!_node.tagName.match(BLOCKELEMENTS)){
+									_node = _node.parentNode;
 								}
-							});
-							if(inlineNodePresent){
-								while(_nodes[0].nodeType === 3 || !_nodes[0].tagName.match(BLOCKELEMENTS)){
-									_nodes = [_nodes[0].parentNode];
-								}
+								_nodes = [_node];
 							}
-							if(angular.element(_nodes[0]).hasClass('ta-bind')){
-								$target = angular.element(options);
-								$target[0].innerHTML = _nodes[0].innerHTML;
-								_nodes[0].innerHTML = $target[0].outerHTML;
-							}else if(optionsTagName === 'blockquote'){
-								// blockquotes wrap other block elements
-								html = '';
-								for(i = 0; i < _nodes.length; i++){
-									html += _nodes[i].outerHTML;
-								}
-								$target = angular.element(options);
-								$target[0].innerHTML = html;
-								_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
-								angular.forEach(_nodes, function(node){
-									node.parentNode.removeChild(node);
-								});
+							for(i = 0; i < _nodes.length; i++){
+								html += _nodes[i].outerHTML;
 							}
-							else {
-								// regular block elements replace other block elements
-								for(i = 0; i < _nodes.length; i++){
-									$target = angular.element(options);
-									$target[0].innerHTML = _nodes[i].innerHTML;
-									_nodes[i].parentNode.insertBefore($target[0],_nodes[i]);
-									_nodes[i].parentNode.removeChild(_nodes[i]);
-								}
-							}
+							$target = angular.element(options);
+							$target[0].innerHTML = html;
+							_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
+							angular.forEach(_nodes, function(node){ node.parentNode.removeChild(node); });
 						}
 						taSelection.setSelectionToElementEnd($target[0]);
 						return;
@@ -1393,6 +1365,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						toolElement.attr('tabindex', '-1');
 						toolElement.attr('ng-click', 'executeAction()');
 						toolElement.attr('ng-class', 'displayActiveToolClass(active)');
+
+						if (toolDefinition && toolDefinition.tooltiptext) {
+							toolElement.attr('title', toolDefinition.tooltiptext);
+						}
+
 						toolElement.on('mousedown', function(e, eventData){
 							/* istanbul ignore else: this is for catching the jqLite testing*/
 							if(eventData) angular.extend(e, eventData);
