@@ -31,7 +31,9 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			}
 			globalContentEditableBlur = false;
 		}, false); // add global click handler
-		angular.element(document.body).append('<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000; left: -10000;" unselectable="on" tabIndex="-1">');
+		angular.element(document).ready(function () {
+			angular.element(document.body).append(angular.element('<input id="textAngular-editableFix-010203040506070809" style="width:1px;height:1px;border:none;margin:0;padding:0;position:absolute; top: -10000; left: -10000;" unselectable="on" tabIndex="-1">'));
+		});
 	}
 	// IE version detection - http://stackoverflow.com/questions/4169160/javascript-ie-detection-why-not-use-simple-conditional-comments
 	// We need this as IE sometimes plays funny tricks with the contenteditable.
@@ -195,12 +197,14 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					restoreSelection is only defined if the rangy library is included and it can be called as `restoreSelection()` to restore the users
 					selection in the WYSIWYG editor.
 			display: [string]?
-					Optional, an HTML element to be displayed as the buton. The `scope` of the button is the tool definition object with some additional functions
+					Optional, an HTML element to be displayed as the button. The `scope` of the button is the tool definition object with some additional functions
 					If set this will cause buttontext and iconclass to be ignored
 			buttontext: [string]?
 					if this is defined it will replace the contents of the element contained in the `display` element
 			iconclass: [string]?
 					if this is defined an icon (<i>) will be appended to the `display` element with this string as it's class
+			tooltiptext: [string]?
+					Optional, a plain text description of the action, used for the title attribute of the action button in the toolbar by default.
 			activestate: [function(commonElement)]?
 					this function is called on every caret movement, if it returns true then the class taOptions.classes.toolbarButtonActive
 					will be applied to the `display` element, else the class will be removed
@@ -1397,6 +1401,11 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						toolElement.attr('tabindex', '-1');
 						toolElement.attr('ng-click', 'executeAction()');
 						toolElement.attr('ng-class', 'displayActiveToolClass(active)');
+
+						if (toolDefinition && toolDefinition.tooltiptext) {
+							toolElement.attr('title', toolDefinition.tooltiptext);
+						}
+
 						toolElement.on('mousedown', function(e, eventData){
 							/* istanbul ignore else: this is for catching the jqLite testing*/
 							if(eventData) angular.extend(e, eventData);
@@ -1670,16 +1679,19 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									workerTools.push({'name': name, 'tool': tool});
 								});
 							}
-							// Run the actions on the first filtered tool only
+							// Run the actions on the first visible filtered tool only
 							if(workerTools.length > 0){
-								var tool = workerTools[0].tool;
-								var name = workerTools[0].name;
-								for(var _t = 0; _t < _toolbars.length; _t++){
-									if(_toolbars[_t].tools[name] !== undefined){
-										tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
-										result = true;
-										break;
+								for(var _i = 0; _i < workerTools.length; _i++){
+									var tool = workerTools[_i].tool;
+									var name = workerTools[_i].name;
+									for(var _t = 0; _t < _toolbars.length; _t++){
+										if(_toolbars[_t].tools[name] !== undefined){
+											tool.onElementSelect.action.call(_toolbars[_t].tools[name], event, element, scope);
+											result = true;
+											break;
+										}
 									}
+									if(result) break; 
 								}
 							}
 							return result;
