@@ -78,88 +78,15 @@ textAngularSetup.value('taCustomRenderers', [
 ]);
 
 textAngularSetup.constant('taTranslations', {
-	// moved to sub-elements
-	//toggleHTML: "Toggle HTML",
-	//insertImage: "Please enter a image URL to insert",
-	//insertLink: "Please enter a URL to insert",
-	//insertVideo: "Please enter a youtube URL to embed",
-	html: {
-		buttontext: 'Toggle HTML',
-		tooltip: 'Toggle html / Rich Text'
-	},
-	// tooltip for heading - might be worth splitting
-	heading: {
-		tooltip: 'Heading '
-	},
-	p: {
-		tooltip: 'Paragraph'
-	},
-	pre: {
-		tooltip: 'Preformatted text'
-	},
-	ul: {
-		tooltip: 'Unordered List'
-	},
-	ol: {
-		tooltip: 'Ordered List'
-	},
-	quote: {
-		tooltip: 'Quote/unqoute selection or paragraph'
-	},
-	undo: {
-		tooltip: 'Undo'
-	},
-	redo: {
-		tooltip: 'Redo'
-	},
-	bold: {
-		tooltip: 'Bold'
-	},
-	italic: {
-		tooltip: 'Italic'
-	},
-	underline: {
-		tooltip: 'Underline'
-	},
-	justifyLeft: {
-		tooltip: 'Align text left'
-	},
-	justifyRight: {
-		tooltip: 'Align text right'
-	},
-	justifyCenter: {
-		tooltip: 'Center'
-	},
-	indent: {
-		tooltip: 'Increase indent'
-	},
-	outdent: {
-		tooltip: 'Decrease indent'
-	},
-	clear: {
-		tooltip: 'Clear formatting'
-	},
-	insertImage: {
-		dialogPrompt: 'Please enter an image URL to insert',
-		tooltip: 'Insert image',
-		hotkey: 'the - possibly language dependent hotkey ... for some future implementation'
-	},
-	insertVideo: {
-		tooltip: 'Insert video',
-		dialogPrompt: 'Please enter a youtube URL to embed'
-	},
-	insertLink: {
-		tooltip: 'Insert / edit link',
-		dialogPrompt: "Please enter a URL to insert"
-	}
-
-
+	toggleHTML: "Toggle HTML",
+	insertImage: "Please enter a image URL to insert",
+	insertLink: "Please enter a URL to insert",
+	insertVideo: "Please enter a youtube URL to embed"
 });
 
 textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelection', function(taRegisterTool, $window, taTranslations, taSelection){
 	taRegisterTool("html", {
-		buttontext: taTranslations.html.buttontext,
-		tooltiptext: taTranslations.html.tooltip,
+		buttontext: taTranslations.toggleHTML,
 		action: function(){
 			this.$editor().switchView();
 		},
@@ -178,23 +105,19 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	angular.forEach(['h1','h2','h3','h4','h5','h6'], function(h){
 		taRegisterTool(h.toLowerCase(), {
 			buttontext: h.toUpperCase(),
-			tooltiptext: taTranslations.heading.tooltip + h.charAt(1),
 			action: headerAction,
 			activeState: _retActiveStateFunction(h.toLowerCase())
 		});
 	});
 	taRegisterTool('p', {
 		buttontext: 'P',
-		tooltiptext: taTranslations.p.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("formatBlock", "<P>");
 		},
 		activeState: function(){ return this.$editor().queryFormatBlockState('p'); }
 	});
-	// key: pre -> taTranslations[key].tooltip, taTranslations[key].buttontext
 	taRegisterTool('pre', {
 		buttontext: 'pre',
-		tooltiptext: taTranslations.pre.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("formatBlock", "<PRE>");
 		},
@@ -202,7 +125,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('ul', {
 		iconclass: 'fa fa-list-ul',
-		tooltiptext: taTranslations.ul.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("insertUnorderedList", null);
 		},
@@ -210,7 +132,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('ol', {
 		iconclass: 'fa fa-list-ol',
-		tooltiptext: taTranslations.ol.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("insertOrderedList", null);
 		},
@@ -218,7 +139,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('quote', {
 		iconclass: 'fa fa-quote-right',
-		tooltiptext: taTranslations.quote.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("formatBlock", "<BLOCKQUOTE>");
 		},
@@ -226,21 +146,18 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('undo', {
 		iconclass: 'fa fa-undo',
-		tooltiptext: taTranslations.undo.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("undo", null);
 		}
 	});
 	taRegisterTool('redo', {
 		iconclass: 'fa fa-repeat',
-		tooltiptext: taTranslations.redo.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("redo", null);
 		}
 	});
 	taRegisterTool('bold', {
 		iconclass: 'fa fa-bold',
-		tooltiptext: taTranslations.bold.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("bold", null);
 		},
@@ -251,7 +168,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('justifyLeft', {
 		iconclass: 'fa fa-align-left',
-		tooltiptext: taTranslations.justifyLeft.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("justifyLeft", null);
 		},
@@ -265,7 +181,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('justifyRight', {
 		iconclass: 'fa fa-align-right',
-		tooltiptext: taTranslations.justifyRight.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("justifyRight", null);
 		},
@@ -278,7 +193,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('justifyCenter', {
 		iconclass: 'fa fa-align-center',
-		tooltiptext: taTranslations.justifyCenter.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("justifyCenter", null);
 		},
@@ -291,7 +205,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('indent', {
 		iconclass: 'fa fa-indent',
-		tooltiptext: taTranslations.indent.tooltip,
+		tooltiptext: 'Indent',
 		action: function(){
 			return this.$editor().wrapSelection("indent", null);
 		},
@@ -301,7 +215,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('outdent', {
 		iconclass: 'fa fa-outdent',
-		tooltiptext: taTranslations.outdent.tooltip,
+		tooltiptext: 'Outdent',
 		action: function(){
 			return this.$editor().wrapSelection("outdent", null);
 		},
@@ -311,7 +225,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('italics', {
 		iconclass: 'fa fa-italic',
-		tooltiptext: taTranslations.italic.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("italic", null);
 		},
@@ -322,7 +235,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('underline', {
 		iconclass: 'fa fa-underline',
-		tooltiptext: taTranslations.underline.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("underline", null);
 		},
@@ -333,7 +245,6 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('clear', {
 		iconclass: 'fa fa-ban',
-		tooltiptext: taTranslations.clear.tooltip,
 		action: function(deferred, restoreSelection){
 			this.$editor().wrapSelection("removeFormat", null);
 			var possibleNodes = angular.element(taSelection.getSelectionElement());
@@ -461,10 +372,9 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	
 	taRegisterTool('insertImage', {
 		iconclass: 'fa fa-picture-o',
-		tooltiptext: taTranslations.insertImage.tooltip,
 		action: function(){
 			var imageLink;
-			imageLink = $window.prompt(taTranslations.insertImage.dialogPrompt, 'http://');
+			imageLink = $window.prompt(taTranslations.insertImage, 'http://');
 			if(imageLink && imageLink !== '' && imageLink !== 'http://'){
 				return this.$editor().wrapSelection('insertImage', imageLink, true);
 			}
@@ -476,10 +386,9 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 	});
 	taRegisterTool('insertVideo', {
 		iconclass: 'fa fa-youtube-play',
-		tooltiptext: taTranslations.insertVideo.tooltip,
 		action: function(){
 			var urlPrompt;
-			urlPrompt = $window.prompt(taTranslations.insertVideo.dialogPrompt, 'http://');
+			urlPrompt = $window.prompt(taTranslations.insertVideo, 'http://');
 			if (urlPrompt && urlPrompt !== '' && urlPrompt !== 'http://') {
 				// get the video ID
 				var ids = urlPrompt.match(/(\?|&)v=[^&]*/);
@@ -501,11 +410,10 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 		}
 	});	
 	taRegisterTool('insertLink', {
-		tooltiptext: taTranslations.insertLink.tooltip,
 		iconclass: 'fa fa-link',
 		action: function(){
 			var urlLink;
-			urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, 'http://');
+			urlLink = $window.prompt(taTranslations.insertLink, 'http://');
 			if(urlLink && urlLink !== '' && urlLink !== 'http://'){
 				return this.$editor().wrapSelection('createLink', urlLink, true);
 			}
@@ -538,7 +446,7 @@ textAngularSetup.run(['taRegisterTool', '$window', 'taTranslations', 'taSelectio
 				var reLinkButton = angular.element('<button type="button" class="btn btn-default btn-sm btn-small" tabindex="-1" unselectable="on"><i class="fa fa-edit icon-edit"></i></button>');
 				reLinkButton.on('click', function(event){
 					event.preventDefault();
-					var urlLink = $window.prompt(taTranslations.insertLink.dialogPrompt, $element.attr('href'));
+					var urlLink = $window.prompt(taTranslations.insertLink, $element.attr('href'));
 					if(urlLink && urlLink !== '' && urlLink !== 'http://'){
 						$element.attr('href', urlLink);
 						editorScope.updateTaBindtaTextElement();
