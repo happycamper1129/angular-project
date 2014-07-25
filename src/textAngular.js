@@ -89,7 +89,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		Custom stylesheet for the placeholders rules.
 		Credit to: http://davidwalsh.name/add-rules-stylesheets
 	*/
-	var sheet, addCSSRule, removeCSSRule;
+	var sheet, addCSSRule, removeCSSRule, _addCSSRule, _removeCSSRule;
 	/* istanbul ignore else: IE <8 test*/
 	if(ie > 8 || ie === undefined){
 		var topsheet = (function() {
@@ -608,6 +608,13 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								scope.html = ngModel.$viewValue || '';
 							}
 						};
+						// trigger the validation calls
+						var _validity = function(value){
+							if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === ''));
+							return value;
+						};
+						ngModel.$parsers.push(_validity);
+						ngModel.$formatters.push(_validity);
 					}else{
 						// if no ngModel then update from the contents of the origional html.
 						scope.displayElements.forminput.val(_originalContents);
@@ -734,10 +741,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 			else return (ie <= 8)? tag.toUpperCase() : tag;
 		};
 	}]).factory('taExecCommand', ['taSelection', 'taBrowserTag', '$document', function(taSelection, taBrowserTag, $document){
-		var BLOCKELEMENTS = /(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)/ig;
-		var LISTELEMENTS = /(ul|li|ol)/ig;
+		var BLOCKELEMENTS = /^(address|article|aside|audio|blockquote|canvas|dd|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|noscript|ol|output|p|pre|section|table|tfoot|ul|video)$/ig;
+		var LISTELEMENTS = /^(ul|li|ol)$/ig;
 		var listToDefault = function(listElement, defaultWrap){
-			var $target;
+			var $target, i;
 			// if all selected then we should remove the list
 			// grab all li elements and convert to taDefaultWrap tags
 			var children = listElement.find('li');
@@ -756,7 +763,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 		};
 		var childElementsToList = function(elements, listElement, newListTag){
 			var html = '';
-			for(i = elements.length - 1; i >= 0; i--){
+			for(var i = 0; i < elements.length; i++){
 				html += '<' + taBrowserTag('li') + '>' + elements[i].innerHTML + '</' + taBrowserTag('li') + '>';
 			}
 			var $target = angular.element('<' + newListTag + '>' + html + '</' + newListTag + '>');
@@ -791,10 +798,16 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							if(tagName === 'ol' || tagName === 'ul'){
 								return listToList($selected, selfTag);
 							}else{
-								if(selectedElement.innerHTML.match(BLOCKELEMENTS)){
+								var childBlockElements = false;
+								angular.forEach($selected.children(), function(elem){
+									if(elem.tagName.match(BLOCKELEMENTS)) {
+										childBlockElements = true;
+									}
+								});
+								if(childBlockElements){
 									return childElementsToList($selected.children(), $selected, selfTag);
 								}else{
-									return childElementsToList(angular.element('<div>' + selectedElement.innerHTML + '</div>'), $selected, selfTag);
+									return childElementsToList([angular.element('<div>' + selectedElement.innerHTML + '</div>')[0]], $selected, selfTag);
 								}
 							}
 						}else if(tagName.match(BLOCKELEMENTS)){
@@ -825,7 +838,8 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							taSelection.setSelectionToElementEnd($target[0]);
 							return;
 						}
-					}else if(command.toLowerCase() === 'formatblock' && 'blockquote' === options.toLowerCase().replace(/[<>]/ig, '')){
+					}else if(command.toLowerCase() === 'formatblock'){
+						var optionsTagName = options.toLowerCase().replace(/[<>]/ig, '');
 						if(tagName === 'li') $target = $selected.parent();
 						else $target = $selected;
 						// find the first blockElement
@@ -833,7 +847,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							$target = $target.parent();
 							tagName = $target[0].tagName.toLowerCase();
 						}
-						if(tagName === options.toLowerCase().replace(/[<>]/ig, '')){
+						if(tagName === optionsTagName){
 							// $target is wrap element
 							_nodes = $target.children();
 							var hasBlock = false;
@@ -851,7 +865,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								$target.remove();
 								$target = defaultWrapper;
 							}
-						}else if($target.parent()[0].tagName.toLowerCase() === options.toLowerCase().replace(/[<>]/ig, '') && !$target.parent().hasClass('ta-bind')){
+						}else if($target.parent()[0].tagName.toLowerCase() === optionsTagName && !$target.parent().hasClass('ta-bind')){
 							//unwrap logic for parent
 							var blockElement = $target.parent();
 							var contents = blockElement.contents();
@@ -872,21 +886,44 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// default wrap behaviour
 							_nodes = taSelection.getOnlySelectedElements();
 							if(_nodes.length === 0) _nodes = [$target[0]];
-							html = '';
-							if(_nodes.length === 1 && _nodes[0].nodeType === 3){
-								var _node = _nodes[0].parentNode;
-								while(!_node.tagName.match(BLOCKELEMENTS)){
-									_node = _node.parentNode;
+							// find the parent block element if any of the nodes are inline or text
+							var inlineNodePresent = false;
+							angular.forEach(_nodes, function(node){
+								if(node.nodeType === 3 || !node.tagName.match(BLOCKELEMENTS)){
+									inlineNodePresent = true;
 								}
-								_nodes = [_node];
+							});
+							if(inlineNodePresent){
+								while(_nodes[0].nodeType === 3 || !_nodes[0].tagName.match(BLOCKELEMENTS)){
+									_nodes = [_nodes[0].parentNode];
+								}
 							}
-							for(i = 0; i < _nodes.length; i++){
-								html += _nodes[i].outerHTML;
+							if(angular.element(_nodes[0]).hasClass('ta-bind')){
+								$target = angular.element(options);
+								$target[0].innerHTML = _nodes[0].innerHTML;
+								_nodes[0].innerHTML = $target[0].outerHTML;
+							}else if(optionsTagName === 'blockquote'){
+								// blockquotes wrap other block elements
+								html = '';
+								for(i = 0; i < _nodes.length; i++){
+									html += _nodes[i].outerHTML;
+								}
+								$target = angular.element(options);
+								$target[0].innerHTML = html;
+								_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
+								angular.forEach(_nodes, function(node){
+									node.parentNode.removeChild(node);
+								});
 							}
-							$target = angular.element(options);
-							$target[0].innerHTML = html;
-							_nodes[0].parentNode.insertBefore($target[0],_nodes[0]);
-							angular.forEach(_nodes, function(node){ node.parentNode.removeChild(node); });
+							else {
+								// regular block elements replace other block elements
+								for(i = 0; i < _nodes.length; i++){
+									$target = angular.element(options);
+									$target[0].innerHTML = _nodes[i].innerHTML;
+									_nodes[i].parentNode.insertBefore($target[0],_nodes[i]);
+									_nodes[i].parentNode.removeChild(_nodes[i]);
+								}
+							}
 						}
 						taSelection.setSelectionToElementEnd($target[0]);
 						return;
@@ -910,7 +947,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 				var _isInputFriendly = _isContentEditable || element[0].tagName.toLowerCase() === 'textarea' || element[0].tagName.toLowerCase() === 'input';
 				var _isReadonly = false;
 				var _focussed = false;
-
+				
 				// defaults to the paragraph element, but we need the line-break or it doesn't allow you to type into the empty element
 				// non IE is '<p><br/></p>', ie is '<p></p>' as for once IE gets it correct...
 				var _defaultVal, _defaultTest;
@@ -941,12 +978,20 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 					if(_isInputFriendly) return element.val();
 					throw ('textAngular Error: attempting to update non-editable taBind');
 				};
-
+				
+				var _setViewValue = function(val){
+					if(!val) val = _compileHtml();
+					if(val === _defaultTest){
+						// this avoids us from tripping the ng-pristine flag if we click in and out with out typing
+						if(ngModel.$viewValue !== '') ngModel.$setViewValue('');
+					}else ngModel.$setViewValue(val);
+				};
+				
 				//used for updating when inserting wrapped elements
 				scope.$parent['updateTaBind' + (attrs.id || '')] = function(){
-					if(!_isReadonly) ngModel.$setViewValue(_compileHtml());
+					if(!_isReadonly) _setViewValue();
 				};
-
+				
 				//this code is used to update the models when data is entered/deleted
 				if(_isInputFriendly){
 					if(!_isContentEditable){
@@ -965,7 +1010,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 							// timeout to next is needed as otherwise the paste/cut event has not finished actually changing the display
 							if(!_isReadonly)
 								$timeout(function(){
-									ngModel.$setViewValue(_compileHtml());
+									_setViewValue();
 								}, 0);
 							else e.preventDefault();
 						});
@@ -995,7 +1040,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 								else{
 									$document[0].execCommand('insertText', false, text);
 								}
-								ngModel.$setViewValue(_compileHtml());
+								_setViewValue();
 							}
 						});
 
@@ -1021,17 +1066,15 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 									element[0].innerHTML = _defaultVal;
 									taSelection.setSelectionToElementStart(element.children()[0]);
 								}
-								ngModel.$setViewValue(val);
+								_setViewValue(val);
 							}
 						});
 
 						element.on('blur', function(){
 							_focussed = false;
-							var val = _compileHtml();
 							/* istanbul ignore else: if readonly don't update model */
 							if(!_isReadonly){
-								if(val === _defaultTest) ngModel.$setViewValue('');
-								else ngModel.$setViewValue(_compileHtml());
+								_setViewValue();
 							}
 							ngModel.$render();
 						});
@@ -1053,17 +1096,24 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						});
 					}
 				}
-
+				
 				// catch DOM XSS via taSanitize
 				// Sanitizing both ways is identical
 				var _sanitize = function(unsafe){
 					return (ngModel.$oldViewValue = taSanitize(taFixChrome(unsafe), ngModel.$oldViewValue));
 				};
-
+				
+				// trigger the validation calls
+				var _validity = function(value){
+					if(attrs.required) ngModel.$setValidity('required', !(!value || value.trim() === _defaultTest || value.trim() === ''));
+					return value;
+				};
 				// parsers trigger from the above keyup function or any other time that the viewValue is updated and parses it for storage in the ngModel
 				ngModel.$parsers.push(_sanitize);
+				ngModel.$parsers.push(_validity);
 				// because textAngular is bi-directional (which is awesome) we need to also sanitize values going in from the server
 				ngModel.$formatters.push(_sanitize);
+				ngModel.$formatters.push(_validity);
 
 				var selectorClickHandler = function(event){
 					// emit the element-select event, pass the element
@@ -1144,7 +1194,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 						}
 					}
 				};
-
+				
 				if(attrs.taReadonly){
 					//set initial value
 					_isReadonly = scope.$parent.$eval(attrs.taReadonly);
@@ -1821,7 +1871,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	/* istanbul ignore next: all browser specifics and PhantomJS dosen't seem to support half of it */
 	function($window, $document){
 		// need to dereference the document else the calls don't work correctly
-		_document = $document[0];
+		var _document = $document[0];
 		var nextNode = function(node) {
 			if (node.hasChildNodes()) {
 				return node.firstChild;
