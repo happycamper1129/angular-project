@@ -135,7 +135,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 	};
 	_addCSSRule = function(_sheet, selector, rules){
 		var insertIndex;
-		
+		var insertedRule;
 		// This order is important as IE 11 has both cssRules and rules but they have different lengths - cssRules is correct, rules gives an error in IE 11
 		/* istanbul ignore else: firefox catch */
 		if(_sheet.cssRules) insertIndex = Math.max(_sheet.cssRules.length - 1, 0);
@@ -148,19 +148,34 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		else {
 			_sheet.addRule(selector, rules, insertIndex);
 		}
-		// return the index of the stylesheet rule
-		return insertIndex;
+		if(sheet.rules) insertedRule = sheet.rules[insertIndex];
+		else if(sheet.cssRules) insertedRule = sheet.cssRules[insertIndex];
+		// return the inserted stylesheet rule
+		return insertedRule;
 	};
 
-	removeCSSRule = function(index){
-		_removeCSSRule(sheet, index);
+	_getRuleIndex = function(rule, rules) {
+		var i, ruleIndex;
+		for (i=0; i < rules.length; i++) {
+			if (rules[i].cssText === rule.cssText) {
+				ruleIndex = i;
+				break;
+			}
+		}
+		return ruleIndex;
 	};
-	_removeCSSRule = function(sheet, index){
+
+	removeCSSRule = function(rule){
+		_removeCSSRule(sheet, rule);
+	};
+
+	_removeCSSRule = function(sheet, rule){
 		/* istanbul ignore else: untestable IE option */
+		var ruleIndex = _getRuleIndex(rule, sheet.cssRules || sheet.rules);
 		if(sheet.removeRule){
-			sheet.removeRule(index);
+			sheet.removeRule(ruleIndex);
 		}else{
-			sheet.deleteRule(index);
+			sheet.deleteRule(ruleIndex);
 		}
 	};
 }
@@ -1457,12 +1472,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 					element.on('keyup', scope.events.keyup = function(event, eventData){
 						/* istanbul ignore else: this is for catching the jqLite testing*/
 						if(eventData) angular.extend(event, eventData);
-						/* istanbul ignore next: FF specific bug fix */
-						if (event.keyCode === 9) {
-							var _selection = taSelection.getSelection();
-							if(_selection.start.element === element[0] && element.children().length) taSelection.setSelectionToElementStart(element.children()[0]);
-							return;
-						}
 						if(_undoKeyupTimeout) $timeout.cancel(_undoKeyupTimeout);
 						if(!_isReadonly && !BLOCKED_KEYS.test(event.keyCode)){
 							// if enter - insert new taDefaultWrap, if shift+enter insert <br/>
@@ -1511,12 +1520,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 					// Placeholders not supported on ie 8 and below
 					if(attrs.placeholder && (_browserDetect.ie > 8 || _browserDetect.ie === undefined)){
-						var ruleIndex;
-						if(attrs.id) ruleIndex = addCSSRule('#' + attrs.id + '.placeholder-text:before', 'content: "' + attrs.placeholder + '"');
+						var rule;
+						if(attrs.id) rule = addCSSRule('#' + attrs.id + '.placeholder-text:before', 'content: "' + attrs.placeholder + '"');
 						else throw('textAngular Error: An unique ID is required for placeholders to work');
 
 						scope.$on('$destroy', function(){
-							removeCSSRule(ruleIndex);
+							removeCSSRule(rule);
 						});
 					}
 
