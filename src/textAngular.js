@@ -135,7 +135,7 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 	};
 	_addCSSRule = function(_sheet, selector, rules){
 		var insertIndex;
-		var insertedRule;
+		
 		// This order is important as IE 11 has both cssRules and rules but they have different lengths - cssRules is correct, rules gives an error in IE 11
 		/* istanbul ignore else: firefox catch */
 		if(_sheet.cssRules) insertIndex = Math.max(_sheet.cssRules.length - 1, 0);
@@ -148,34 +148,19 @@ if(_browserDetect.ie > 8 || _browserDetect.ie === undefined){
 		else {
 			_sheet.addRule(selector, rules, insertIndex);
 		}
-		if(sheet.rules) insertedRule = sheet.rules[insertIndex];
-		else if(sheet.cssRules) insertedRule = sheet.cssRules[insertIndex];
-		// return the inserted stylesheet rule
-		return insertedRule;
+		// return the index of the stylesheet rule
+		return insertIndex;
 	};
 
-	_getRuleIndex = function(rule, rules) {
-		var i, ruleIndex;
-		for (i=0; i < rules.length; i++) {
-			if (rules[i].cssText === rule.cssText) {
-				ruleIndex = i;
-				break;
-			}
-		}
-		return ruleIndex;
+	removeCSSRule = function(index){
+		_removeCSSRule(sheet, index);
 	};
-
-	removeCSSRule = function(rule){
-		_removeCSSRule(sheet, rule);
-	};
-
-	_removeCSSRule = function(sheet, rule){
+	_removeCSSRule = function(sheet, index){
 		/* istanbul ignore else: untestable IE option */
-		var ruleIndex = _getRuleIndex(rule, sheet.cssRules || sheet.rules);
 		if(sheet.removeRule){
-			sheet.removeRule(ruleIndex);
+			sheet.removeRule(index);
 		}else{
-			sheet.deleteRule(ruleIndex);
+			sheet.deleteRule(index);
 		}
 	};
 }
@@ -1391,7 +1376,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						element.addClass('processing-paste');
 						var pastedContent;
 						var clipboardData = (e.originalEvent || e).clipboardData;
-						if (clipboardData && clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+						if (clipboardData && clipboardData.getData && clipboardData.types.length > 0) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
 							var _types = "";
 							for(var _t = 0; _t < clipboardData.types.length; _t++){
 								_types += " " + clipboardData.types[_t];
@@ -1520,12 +1505,12 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 					// Placeholders not supported on ie 8 and below
 					if(attrs.placeholder && (_browserDetect.ie > 8 || _browserDetect.ie === undefined)){
-						var rule;
-						if(attrs.id) rule = addCSSRule('#' + attrs.id + '.placeholder-text:before', 'content: "' + attrs.placeholder + '"');
+						var ruleIndex;
+						if(attrs.id) ruleIndex = addCSSRule('#' + attrs.id + '.placeholder-text:before', 'content: "' + attrs.placeholder + '"');
 						else throw('textAngular Error: An unique ID is required for placeholders to work');
 
 						scope.$on('$destroy', function(){
-							removeCSSRule(rule);
+							removeCSSRule(ruleIndex);
 						});
 					}
 
