@@ -358,7 +358,6 @@ angular.module('textAngularSetup', [])
 	});
 	taRegisterTool('strikeThrough', {
 		iconclass: 'fa fa-strikethrough',
-		tooltiptext: taTranslations.strikeThrough.tooltip,
 		action: function(){
 			return this.$editor().wrapSelection("strikeThrough", null);
 		},
