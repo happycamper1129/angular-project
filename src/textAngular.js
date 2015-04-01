@@ -1372,10 +1372,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							}
 							
 							text = taSanitize(text, '', _disableSanitizer);
-							if (/<li(\s.*)?>/i.test(text) && /(<ul(\s.*)?>|<ol(\s.*)?>).*<li(\s.*)?>/i.test(text) === false) {
-								// insert missing parent of li element
-								text = text.replace(/<li(\s.*)?>.*<\/li(\s.*)?>/i, '<ul>$&</ul>');
-							}
 							
 							if(_pasteHandler) text = _pasteHandler(scope, {$html: text}) || text;
 							
@@ -1448,7 +1444,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 						if(eventData) angular.extend(event, eventData);
 						/* istanbul ignore else: readonly check */
 						if(!_isReadonly){
-							if(!event.altKey && event.metaKey || event.ctrlKey){
+							if(!event.altKey && (event.metaKey || event.ctrlKey)){
 								// covers ctrl/command + z
 								if((event.keyCode === 90 && !event.shiftKey)){
 									_undo();
@@ -1759,7 +1755,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 		}
 	};
 }]);
-
 // this global var is used to prevent multiple fires of the drop event. Needs to be global to the textAngular file.
 var dropFired = false;
 var textAngular = angular.module("textAngular", ['ngSanitize', 'textAngularSetup', 'textAngular.factories', 'textAngular.DOM', 'textAngular.validators', 'textAngular.taBind']); //This makes ngSanitize required
