@@ -413,13 +413,14 @@ angular.module('textAngular.factories', [])
 		var deferred = $q.defer(),
 			promise = deferred.promise,
 			_editor = this.$editor();
-		promise['finally'](function(){
-			_editor.endAction.call(_editor);
-		});
 		// pass into the action the deferred function and also the function to reload the current selection if rangy available
 		var result;
 		try{
 			result = this.action(deferred, _editor.startAction());
+			// We set the .finally callback here to make sure it doesn't get executed before any other .then callback.
+			promise['finally'](function(){
+				_editor.endAction.call(_editor);
+			});
 		}catch(exc){
 			$log.error(exc);
 		}
@@ -465,7 +466,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 	};
 	return function(taDefaultWrap, topNode){
 		taDefaultWrap = taBrowserTag(taDefaultWrap);
-		return function(command, showUI, options, defaultTagAttributes){
+		return function(command, showUI, options){
 			var i, $target, html, _nodes, next, optionsTagName, selectedElement;
 			var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 			try{
@@ -637,19 +638,12 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					taSelection.setSelectionToElementEnd($target[0]);
 					return;
 				}else if(command.toLowerCase() === 'createlink'){
-					var tagBegin = '<a href="' + options + '" target="' +
-							(defaultTagAttributes.a.target ? defaultTagAttributes.a.target : '') +
-							'">',
-						tagEnd = '</a>',
-						_selection = taSelection.getSelection();
+					var _selection = taSelection.getSelection();
 					if(_selection.collapsed){
 						// insert text at selection, then select then just let normal exec-command run
-						taSelection.insertHtml(tagBegin + options + tagEnd, topNode);
-					}else if(rangy.getSelection().getRangeAt(0).canSurroundContents()){
-						var node = angular.element(tagBegin + tagEnd)[0];
-						rangy.getSelection().getRangeAt(0).surroundContents(node);
+						taSelection.insertHtml('<a href="' + options + '">' + options + '</a>', topNode);
+						return;
 					}
-					return;
 				}else if(command.toLowerCase() === 'inserthtml'){
 					taSelection.insertHtml(options, topNode);
 					return;
@@ -1910,7 +1904,7 @@ textAngular.directive("textAngular", [
 							scope['$redoTaBindtaTextElement' + _serial]();
 						}else{
 							// catch errors like FF erroring when you try to force an undo with nothing done
-							_taExecCommand(command, false, opt, scope.defaultTagAttributes);
+							_taExecCommand(command, false, opt);
 							if(isSelectableElementTool){
 								// re-apply the selectable tool events
 								scope['reApplyOnSelectorHandlerstaTextElement' + _serial]();
@@ -1926,14 +1920,6 @@ textAngular.directive("textAngular", [
 				if(attrs.taFocussedClass)			scope.classes.focussed = attrs.taFocussedClass;
 				if(attrs.taTextEditorClass)			scope.classes.textEditor = attrs.taTextEditorClass;
 				if(attrs.taHtmlEditorClass)			scope.classes.htmlEditor = attrs.taHtmlEditorClass;
-				if(attrs.taDefaultTagAttributes){
-					try	{
-						//	TODO: This should use angular.merge to enhance functionality when angular 1.4 is required
-						angular.extend(scope.defaultTagAttributes, angular.fromJson(attrs.taDefaultTagAttributes));
-					} catch (error) {
-						$log.error(error);
-					}
-				}
 				// optional setup functions
 				if(attrs.taTextEditorSetup)			scope.setup.textEditorSetup = scope.$parent.$eval(attrs.taTextEditorSetup);
 				if(attrs.taHtmlEditorSetup)			scope.setup.htmlEditorSetup = scope.$parent.$eval(attrs.taHtmlEditorSetup);
