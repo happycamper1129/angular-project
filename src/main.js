@@ -214,10 +214,13 @@ textAngular.directive("textAngular", [
 					scope.displayElements.popoverArrow.css('margin-left', (Math.min(_targetLeft, (Math.max(0, _targetLeft - _maxLeft))) - 11) + 'px');
 				};
 				scope.hidePopover = function(){
-					scope.displayElements.popover.css('display', '');
-					scope.displayElements.popoverContainer.attr('style', '');
-					scope.displayElements.popoverContainer.attr('class', 'popover-content');
-					scope.displayElements.popover.removeClass('in');
+					/* istanbul ignore next: dosen't test with mocked animate */
+					var doneCb = function(){
+						scope.displayElements.popover.css('display', '');
+						scope.displayElements.popoverContainer.attr('style', '');
+						scope.displayElements.popoverContainer.attr('class', 'popover-content');
+					};
+					$q.when($animate.removeClass(scope.displayElements.popover, 'in', doneCb)).then(doneCb);
 				};
 
 				// setup the resize overlay
@@ -283,6 +286,7 @@ textAngular.directive("textAngular", [
 						event.preventDefault();
 					};
 
+					scope.displayElements.resize.anchors[3].off('mousedown');
 					scope.displayElements.resize.anchors[3].on('mousedown', _resizeMouseDown);
 
 					scope.reflowResizeOverlay(_el);
