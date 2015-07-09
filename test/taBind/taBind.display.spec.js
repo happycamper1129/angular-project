@@ -93,6 +93,16 @@ describe('taBind.display', function () {
 				$rootScope.$digest();
 				expect(element.hasClass('placeholder-text')).toBe(false);
 			});
+			it('should not add the placeholder text back if focussed and blank', function () {
+				element.triggerHandler('focus');
+				$rootScope.$digest();
+				$rootScope.html = '<p>Lorem Ipsum</p>';
+				$rootScope.$digest();
+				$rootScope.html = '';
+				$rootScope.$digest();
+				expect($window.getComputedStyle(element[0], ':before').getPropertyValue('display')).toBe("");
+				expect(element.html()).toEqual('<p><br></p>');
+			});
 		});
 		describe('as contenteditable div initially with content', function(){
 			var $rootScope, element, $window;
@@ -158,12 +168,13 @@ describe('taBind.display', function () {
 		it('should display model contents', function () {
 			expect(element.html()).toBe('<p>Test Contents</p>');
 		});
-		it('should NOT update model from keyup', function () {
+		it('should NOT update model from keyup', inject(function ($timeout) {
 			element.html('<div>Test 2 Content</div>');
 			element.triggerHandler('keyup');
 			$rootScope.$digest();
+			$timeout.flush();
 			expect($rootScope.html).toBe('<p>Test Contents</p>');
-		});
+		}));
 		it('should error on update model from update function', function () {
 			element.html('<div>Test 2 Content</div>');
 			expect(function () {

@@ -73,6 +73,40 @@ describe('taToolsExecuteFunction', function(){
 			expect(editor.finishCount).toBe(0);
 		});
 	});
+	
+	describe('promise works correctly', function(){
+		it('start and end once promise resolved', function(){
+			var _deferred;
+			scope.action = function(deferred, startActionResult){
+				_deferred = deferred;
+				return false;
+			};
+			$rootScope.$apply(function(){ scope.taToolExecuteAction(); });
+			expect(editor.startCount).toBe(1);
+			expect(editor.finishCount).toBe(0);
+			$rootScope.$apply(function(){ _deferred.resolve(); });
+			expect(editor.startCount).toBe(1);
+			expect(editor.finishCount).toBe(1);
+		});
+		
+		it('.then promises called before .finally', function(){
+			var _deferred;
+			scope.action = function(deferred, startActionResult){
+				_deferred = deferred;
+				_deferred.promise.then(function(){
+					expect(editor.startCount).toBe(1);
+					expect(editor.finishCount).toBe(0);
+				});
+				return false;
+			};
+			$rootScope.$apply(function(){ scope.taToolExecuteAction(); });
+			expect(editor.startCount).toBe(1);
+			expect(editor.finishCount).toBe(0);
+			$rootScope.$apply(function(){ _deferred.resolve(); });
+			expect(editor.startCount).toBe(1);
+			expect(editor.finishCount).toBe(1);
+		});
+	});
 });
 
 function buttonByName(element, name){
@@ -325,15 +359,41 @@ describe('taTools test tool actions', function(){
 		}));
 		
 		it('word count should be 13', function(){
-			expect(buttons.childNodes[0].innerHTML).toBe('Words:13');
+			expect(buttons.childNodes[0].childNodes[1].innerHTML).toBe('13');
 			expect(editorScope.wordcount).toBe(13);
 		});
 		
 		it('char count should be 62', function(){
-			expect(buttons.childNodes[1].innerHTML).toBe('Characters:62');
+			expect(buttons.childNodes[1].childNodes[1].innerHTML).toBe('62');
 			expect(editorScope.charcount).toBe(62);
 		});
 	});
+
+		describe('test count buttons with odd markup', function(){
+				beforeEach(module('textAngular'));
+				var buttons;
+				beforeEach(inject(function (_$compile_, _$rootScope_, $document, textAngularManager, _$window_) {
+						$window = _$window_;
+						$rootScope = _$rootScope_;
+						$rootScope.htmlcontent = '<p>Test Co<i><b><u>nt</u>e</b></i>nt <b>that</b> <u>should</u> be c<span style="color:#ff0000;">lea</span>red</p><h1>Test Other Tags</h1>\n<ul><li>Test <b>1</b></li><li>Test 2</li></ul>';
+						element = _$compile_('<text-angular name="test" ng-model="htmlcontent" ta-toolbar="[[\'wordcount\',\'charcount\']]"></text-angular>')($rootScope);
+						$rootScope.$digest();
+						editorScope = textAngularManager.retrieveEditor('test').scope;
+						buttons = element.children()[0].childNodes[0];
+						textAngularManager.retrieveEditor('test').editorFunctions.updateSelectedStyles();
+						$rootScope.$digest();
+				}));
+
+				it('word count should be 13', function(){
+						expect(buttons.childNodes[0].childNodes[1].innerHTML).toBe('13');
+						expect(editorScope.wordcount).toBe(13);
+				});
+
+				it('char count should be 62', function(){
+						expect(buttons.childNodes[1].childNodes[1].innerHTML).toBe('62');
+						expect(editorScope.charcount).toBe(62);
+				});
+		});
 	
 	describe('test clear button', function(){
 		beforeEach(module('textAngular'));
@@ -506,6 +566,7 @@ describe('taTools test tool actions', function(){
 			
 			it('opens on click', function(){
 				editorScope.displayElements.text.find('p').find('a').triggerHandler('click');
+				editorScope.$parent.$digest();
 				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 			});
 			
@@ -588,6 +649,7 @@ describe('taTools test tool actions', function(){
 		
 		it('opens on click', function(){
 			editorScope.displayElements.text.find('p').find('img').triggerHandler('click');
+			editorScope.$parent.$digest();
 			expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 		});
 		

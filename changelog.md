@@ -1,3 +1,94 @@
+<a name="1.4.1"></a>
+### 1.4.1 (2015-05-25)
+
+#### Breaking Changes
+
+This changes the structure of the files - all production files are now in the dist folder, this makes where PR's should be done a little more clear.
+
+If you were referencing the src/*.js files they will need to be updated to dist/*js.
+
+#### Bug Fixes
+
+* **taPaste:** Fix the taPaste order s.t. sanitizer is called after paste handler. ([108857f6](http://github.com/fraywing/textAngular/commit/108857f69ac611f970ded65ba5c1207b8a6964d0), closes [#686](http://github.com/fraywing/textAngular/issues/686))
+
+
+<a name="1.4.0"></a>
+## 1.4.0 (2015-05-24)
+
+#### Breaking Changes
+
+The minimum required versions of AngularJS is 1.3 and Rangy is 1.3.
+
+#### Bug Fixes
+
+* **chrome:** Make the matcher for detecting bad chorem tags more lenient ([05fe7a61](http://github.com/fraywing/textAngular/commit/05fe7a61470d41b6533f5220894ec1a3451dc801))
+* **taBind:** Updating while focussed. ([cc6d89be](http://github.com/fraywing/textAngular/commit/cc6d89bee18de5a2666aae075c707ae7aa68cb9f), closes [#38](http://github.com/fraywing/textAngular/issues/38))
+* **taBind.formatters:** Catch unwrapped content ([0cd98dd3](http://github.com/fraywing/textAngular/commit/0cd98dd3115f4e7d09263eeeb0136ec9d2ccaafa), closes [#584](http://github.com/fraywing/textAngular/issues/584))
+* **taBind.keyevents:** Attempted fix for polish character issues ([26226dda](http://github.com/fraywing/textAngular/commit/26226ddaa9f5468977f3a4849e265904ca2fad6a), closes [#518](http://github.com/fraywing/textAngular/issues/518))
+* **taBinde.undomanager:** Fix a bug with redo/undo beyond the borders ([dd023c30](http://github.com/fraywing/textAngular/commit/dd023c30537cd79550de630f7d4360331eb02975), closes [#558](http://github.com/fraywing/textAngular/issues/558))
+
+
+#### Features
+
+* **bootstrap:** Bootstrap is no longer required in bower ([5e7459eb](http://github.com/fraywing/textAngular/commit/5e7459eb03bf66c62d05b8b42225c7b5e1e75da5), closes [#649](http://github.com/fraywing/textAngular/issues/649))
+* **taTools:** Added options for tools in taOptions ([7fb00a02](http://github.com/fraywing/textAngular/commit/7fb00a02993f8c02b09f8a24c3c267b6ba4f8fbd))
+
+
+<a name="1.3.11"></a>
+### 1.3.11 (2015-03-16)
+
+
+<a name="1.3.10"></a>
+### 1.3.10 (2015-03-16)
+
+
+#### Bug Fixes
+
+* **placeholder:** multiple textAngular will cause CSSRule index error ([943f08d5](http://github.com/fraywing/textAngular/commit/943f08d5b1ccc1c358071e67f5968267a0664299))
+
+
+<a name="1.3.9"></a>
+### 1.3.9 (2015-03-13)
+
+
+#### Bug Fixes
+
+* **taBind.$formatters:** Fix an issue where unwrapped tags broke the textarea display ([d39c7b63](http://github.com/fraywing/textAngular/commit/d39c7b63732b345b826068de4f9655d082d74262), closes [#566](http://github.com/fraywing/textAngular/issues/566))
+
+
+<a name="1.3.8"></a>
+### 1.3.8 (2015-03-13)
+
+
+#### Bug Fixes
+
+* **taBind:** Fix tab focus issue. ([8693e1d6](http://github.com/fraywing/textAngular/commit/8693e1d69daf44bb4ca6a94863bd2e43b598f571), closes [#483](http://github.com/fraywing/textAngular/issues/483), [#379](http://github.com/fraywing/textAngular/issues/379))
+* **textAngular.popover:** Add scroll top offset. ([f12eb86d](http://github.com/fraywing/textAngular/commit/f12eb86d7dd473244f09982dc1b13b0e0949ca5c))
+
+
+<a name="1.3.7"></a>
+### 1.3.7 (2015-02-13)
+
+
+#### Bug Fixes
+
+* **taSanitize:** Close XSS vector, See http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0167, http://xforce.iss.net/xforce/xfdb/100929 and https://exchange.xforce.ibmcloud.com/#/vulnerabilities/100929 for details. ([f5f27c26](http://github.com/fraywing/textAngular/commit/f5f27c26bc99dc6f8bb226d7beb99ce8bcada01a))
+
+
+<a name="1.3.6"></a>
+### 1.3.6 (2015-02-06)
+
+
+#### Bug Fixes
+
+* **taSelection:** Fix selecting end of element being after trailing <br> ([e1008dfc](http://github.com/fraywing/textAngular/commit/e1008dfc02592b8484ff618bafbcd7f30084b8e4))
+
+
+#### Features
+
+* **taBind:** Allow updates while focussed. ([452c7f01](http://github.com/fraywing/textAngular/commit/452c7f010aea73a69d09672623b5deb6b8a32bf4), closes [#38](http://github.com/fraywing/textAngular/issues/38))
+
+
 <a name="1.3.5"></a>
 ### 1.3.5 (2015-02-05)
 

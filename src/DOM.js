@@ -34,7 +34,7 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 	};
 	return function(taDefaultWrap, topNode){
 		taDefaultWrap = taBrowserTag(taDefaultWrap);
-		return function(command, showUI, options){
+		return function(command, showUI, options, defaultTagAttributes){
 			var i, $target, html, _nodes, next, optionsTagName, selectedElement;
 			var defaultWrapper = angular.element('<' + taDefaultWrap + '>');
 			try{
@@ -206,12 +206,19 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 					taSelection.setSelectionToElementEnd($target[0]);
 					return;
 				}else if(command.toLowerCase() === 'createlink'){
-					var _selection = taSelection.getSelection();
+					var tagBegin = '<a href="' + options + '" target="' +
+							(defaultTagAttributes.a.target ? defaultTagAttributes.a.target : '') +
+							'">',
+						tagEnd = '</a>',
+						_selection = taSelection.getSelection();
 					if(_selection.collapsed){
 						// insert text at selection, then select then just let normal exec-command run
-						taSelection.insertHtml('<a href="' + options + '">' + options + '</a>', topNode);
-						return;
+						taSelection.insertHtml(tagBegin + options + tagEnd, topNode);
+					}else if(rangy.getSelection().getRangeAt(0).canSurroundContents()){
+						var node = angular.element(tagBegin + tagEnd)[0];
+						rangy.getSelection().getRangeAt(0).surroundContents(node);
 					}
+					return;
 				}else if(command.toLowerCase() === 'inserthtml'){
 					taSelection.insertHtml(options, topNode);
 					return;
@@ -315,13 +322,15 @@ function($window, $document, taDOM){
 			
 			range.selectNodeContents(el);
 			range.collapse(false);
-			
+			if(el.childNodes && el.childNodes[el.childNodes.length - 1] && el.childNodes[el.childNodes.length - 1].nodeName === 'br'){
+				range.startOffset = range.endOffset = range.startOffset - 1;
+			}
 			rangy.getSelection().setSingleRange(range);
 		},
 		// from http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div
 		// topNode is the contenteditable normally, all manipulation MUST be inside this.
 		insertHtml: function(html, topNode){
-			var parent, secondParent, _childI, nodes, startIndex, startNodes, endNodes, i, lastNode, _tempFrag;
+			var parent, secondParent, _childI, nodes, i, lastNode, _tempFrag;
 			var element = angular.element("<div>" + html + "</div>");
 			var range = rangy.getSelection().getRangeAt(0);
 			var frag = _document.createDocumentFragment();
@@ -420,6 +429,7 @@ function($window, $document, taDOM){
 					range.deleteContents();
 				}
 			}
+			
 			range.insertNode(frag);
 			if(lastNode){
 				api.setSelectionToElementEnd(lastNode);
