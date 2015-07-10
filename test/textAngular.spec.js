@@ -160,7 +160,7 @@ describe('textAngular', function(){
 			});
 		});
 	});
-
+	
 	describe('Disable the editor', function(){
 		beforeEach(inject(function (_$compile_, _$rootScope_) {
 			$rootScope = _$rootScope_;
@@ -187,36 +187,16 @@ describe('textAngular', function(){
 			});
 		});
 	});
-
+	
 	it('respects the taShowHtml attribute',inject(function ($compile, $rootScope, $document) {
-		element = $compile('<text-angular name="test" ta-show-html="true"></text-angular>')($rootScope);
-		$document.find('body').append(element);
-		$rootScope.$digest();
-		expect(jQuery('.ta-text', element[0]).is(':visible')).toBe(false);
-		expect(jQuery('.ta-html', element[0]).is(':visible')).toBe(true);
-		element.remove();
-	}));
-
-	it('respects the taDefaultTagAttributes attribute',inject(function ($compile, $rootScope, $document, textAngularManager) {
-		$rootScope.taTestDefaultTagAttributes = {a:{target:"_blank"}, li:{test:"testing"}};
-		element = $compile('<text-angular name="test" ta-default-tag-attributes="{{taTestDefaultTagAttributes}}"></text-angular>')($rootScope);
-		$document.find('body').append(element);
-		editorScope = textAngularManager.retrieveEditor('test').scope;
-		$rootScope.$digest();
-		expect(editorScope.defaultTagAttributes).toEqual($rootScope.taTestDefaultTagAttributes);
-		element.remove();
-	}));
-
-	it('uses the default defaultTagAttributes when the taDefaultTagAttributes attribute throws a JSON parse error',inject(function ($compile, $rootScope, $document, textAngularManager) {
-		var taTestDefaultTagAttributes = {a:{target:""}};
-		element = $compile('<text-angular name="test" ta-default-tag-attributes="invalidJSON"></text-angular>')($rootScope);
-		$document.find('body').append(element);
-		editorScope = textAngularManager.retrieveEditor('test').scope;
-		$rootScope.$digest();
-		expect(editorScope.defaultTagAttributes).toEqual(taTestDefaultTagAttributes);
-		element.remove();
-	}));
-
+			element = $compile('<text-angular name="test" ta-show-html="true"></text-angular>')($rootScope);
+			$document.find('body').append(element);
+			$rootScope.$digest();
+			expect(jQuery('.ta-text', element[0]).is(':visible')).toBe(false);
+			expect(jQuery('.ta-html', element[0]).is(':visible')).toBe(true);
+			element.remove();
+		}));
+	
 	describe('Check view change', function(){
 		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager, $document) {
 			$rootScope = _$rootScope_;
@@ -408,11 +388,10 @@ describe('textAngular', function(){
 			});
 			
 			describe('should change on input update', function () {
-				beforeEach(inject(function(textAngularManager, $timeout){
+				beforeEach(inject(function(textAngularManager){
 					element.html('<div>Test Change Content</div>');
 					element.triggerHandler('keyup');
 					$rootScope.$digest();
-					$timeout.flush();
 				}));
 				it('not pristine', function(){
 					expect($rootScope.form.$pristine).toBe(false);
@@ -479,7 +458,7 @@ describe('textAngular', function(){
 					$rootScope.$digest();
 				});
 				it('ng-required', function(){
-					expect($rootScope.form.test.$error.required).toBe(undefined);
+					expect($rootScope.form.test.$error.required).toBe(false);
 				});
 				it('valid', function(){
 					expect($rootScope.form.$valid).toBe(true);
@@ -489,15 +468,14 @@ describe('textAngular', function(){
 				});
 			});
 			
-			describe('should change on input update', function() {
-				beforeEach(inject(function(textAngularManager, $timeout){
+			describe('should change on input update', function () {
+				beforeEach(inject(function(textAngularManager){
 					element.html('<div>Test Change Content</div>');
 					element.triggerHandler('keyup');
 					$rootScope.$digest();
-					$timeout.flush();
 				}));
 				it('ng-required', function(){
-					expect($rootScope.form.test.$error.required).toBe(undefined);
+					expect($rootScope.form.test.$error.required).toBe(false);
 				});
 				it('valid', function(){
 					expect($rootScope.form.$valid).toBe(true);
@@ -514,7 +492,7 @@ describe('textAngular', function(){
 					$rootScope.$digest();
 				}));
 				it('ng-required', function(){
-					expect($rootScope.form.test.$error.required).toBe(undefined);
+					expect($rootScope.form.test.$error.required).toBe(false);
 				});
 				it('valid', function(){
 					expect($rootScope.form.$valid).toBe(true);
@@ -617,10 +595,8 @@ describe('textAngular', function(){
 	
 	
 	describe('should respect taUnsafeSanitizer attribute', function () {
-		var element2, displayElements, $timeout;
-		beforeEach(inject(function(_$timeout_){
-			$timeout = _$timeout_;
-		}));
+		var element2, displayElements;
+		
 		describe('without ng-model', function(){
 			beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 				$rootScope = _$rootScope_;
@@ -635,15 +611,13 @@ describe('textAngular', function(){
 				element.append('<bad-tag>Test 2 Content</bad-tag>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				$timeout.flush();
-				expect(element2.val()).toBe('<p>Test Contents</p>\n<p><bad-tag>Test 2 Content</bad-tag></p>');
+				expect(element2.val()).toBe('<p>Test Contents</p>\n<bad-tag>Test 2 Content</bad-tag>');
 			});
 			
 			it('not allow malformed html', function () {
 				element.append('<bad-tag Test 2 Content</bad-tag>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				$timeout.flush();
 				expect(element2.val()).toBe('<p>Test Contents</p>');
 			});
 		});
@@ -662,15 +636,13 @@ describe('textAngular', function(){
 				element.append('<bad-tag>Test 2 Content</bad-tag>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				$timeout.flush();
-				expect($rootScope.html).toBe('<p>Test Contents</p><p><bad-tag>Test 2 Content</bad-tag></p>');
+				expect($rootScope.html).toBe('<p>Test Contents</p><bad-tag>Test 2 Content</bad-tag>');
 			});
 			
 			it('not allow malformed html', function () {
 				element.append('<bad-tag Test 2 Content</bad-tag>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				$timeout.flush();
 				expect($rootScope.html).toBe('<p>Test Contents</p>');
 			});
 		});
@@ -678,7 +650,7 @@ describe('textAngular', function(){
 	
 	describe('Updates without ng-model', function(){
 		var displayElements;
-		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager, $timeout) {
+		beforeEach(inject(function (_$compile_, _$rootScope_, textAngularManager) {
 			$rootScope = _$rootScope_;
 			element = _$compile_('<text-angular name="test"><p>Test Content</p></text-angular>')($rootScope);
 			$rootScope.$digest();
@@ -686,7 +658,6 @@ describe('textAngular', function(){
 			displayElements.text.html('<div>Test Change Content</div>');
 			displayElements.text.triggerHandler('keyup');
 			$rootScope.$digest();
-			$timeout.flush();
 		}));
 		
 		describe('updates from .ta-text', function(){
@@ -993,7 +964,6 @@ describe('textAngular', function(){
 		describe('popover', function(){
 			it('should show the popover', function(){
 				editorScope.showPopover(editorScope.displayElements.text.find('p').find('i'));
-				editorScope.$parent.$digest();
 				expect(editorScope.displayElements.popover.hasClass('in')).toBe(true);
 			});
 			describe('should hide the popover', function(){
@@ -1005,7 +975,6 @@ describe('textAngular', function(){
 				}));
 				it('on function call', function(){
 					editorScope.hidePopover();
-					editorScope.$parent.$digest();
 					expect(editorScope.displayElements.popover.hasClass('in')).toBe(false);
 				});
 				it('on click in editor', inject(function($document){

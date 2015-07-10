@@ -52,11 +52,10 @@ describe('taBind.validation', function () {
 		});
 		
 		describe('should change on input update', function () {
-			beforeEach(inject(function(textAngularManager, $timeout){
+			beforeEach(inject(function(textAngularManager){
 				element.html('<div>Test Change Content</div>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				$timeout.flush();
 			}));
 			it('not pristine', function(){
 				expect($rootScope.form.$pristine).toBe(false);
@@ -118,14 +117,14 @@ describe('taBind.validation', function () {
 			$rootScope = _$rootScope_;
 			$rootScope.html = '';
 			var _form = angular.element('<form name="form"></form>');
-			element = angular.element('<div ta-bind name="test" contenteditable="true" ng-model="html" required="required"></div>');
+			element = angular.element('<div ta-bind name="test" contenteditable="true" ng-model="html" required></div>');
 			_form.append(element);
 			$document.find('body').append(_$compile_(_form)($rootScope));
 			$rootScope.$digest();
 		}));
 		
 		describe('should start with', function () {
-			it('required', function(){
+			it('ng-required', function(){
 				expect($rootScope.form.test.$error.required).toBe(true);
 			});
 			it('invalid', function(){
@@ -141,8 +140,8 @@ describe('taBind.validation', function () {
 				$rootScope.html = '<div>Test Change Content</div>';
 				$rootScope.$digest();
 			});
-			it('required', function(){
-				expect($rootScope.form.test.$error.required).toBe(undefined);
+			it('ng-required', function(){
+				expect($rootScope.form.test.$error.required).toBe(false);
 			});
 			it('valid', function(){
 				expect($rootScope.form.$valid).toBe(true);
@@ -153,13 +152,11 @@ describe('taBind.validation', function () {
 		});
 		
 		describe('should handle blank test', function () {
-			beforeEach(inject(function($timeout){
-				element.html('<pre><br></pre>');
-				element.triggerHandler('keyup');
+			beforeEach(function(){
+				$rootScope.html = '<pre><br></pre>';
 				$rootScope.$digest();
-				$timeout.flush();
-			}));
-			it('required', function(){
+			});
+			it('ng-required', function(){
 				expect($rootScope.form.test.$error.required).toBe(true);
 			});
 			it('valid', function(){
@@ -176,7 +173,7 @@ describe('taBind.validation', function () {
 				$rootScope.$digest();
 			});
 			it('ng-required', function(){
-				expect($rootScope.form.test.$error.required).toBe(undefined);
+				expect($rootScope.form.test.$error.required).toBe(false);
 			});
 			it('valid', function(){
 				expect($rootScope.form.$valid).toBe(true);
@@ -187,14 +184,13 @@ describe('taBind.validation', function () {
 		});
 		
 		describe('should change on input update', function () {
-			beforeEach(inject(function(textAngularManager, $timeout){
+			beforeEach(inject(function(textAngularManager){
 				element.html('<div>Test Change Content</div>');
 				element.triggerHandler('keyup');
 				$rootScope.$digest();
-				$timeout.flush();
 			}));
 			it('ng-required', function(){
-				expect($rootScope.form.test.$error.required).toBe(undefined);
+				expect($rootScope.form.test.$error.required).toBe(false);
 			});
 			it('valid', function(){
 				expect($rootScope.form.$valid).toBe(true);
@@ -211,7 +207,7 @@ describe('taBind.validation', function () {
 				$rootScope.$digest();
 			}));
 			it('ng-required', function(){
-				expect($rootScope.form.test.$error.required).toBe(undefined);
+				expect($rootScope.form.test.$error.required).toBe(false);
 			});
 			it('valid', function(){
 				expect($rootScope.form.$valid).toBe(true);

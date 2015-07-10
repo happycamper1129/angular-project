@@ -195,8 +195,10 @@ describe('taBind.taReadOnly', function () {
 					it('should not update model from paste', inject(function($timeout) {
 						element.val('<div>Test 2 Content</div>');
 						element.triggerHandler('paste');
+						expect(function(){
+							$timeout.flush();
+						}).toThrow();
 						$rootScope.$digest();
-						$timeout.flush();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					}));
 
@@ -221,8 +223,10 @@ describe('taBind.taReadOnly', function () {
 					it('should not update model from paste', inject(function ($timeout) {
 						element.val('<div>Test 2 Content</div>');
 						element.triggerHandler('paste');
+						expect(function(){
+							$timeout.flush();
+						}).toThrow();
 						$rootScope.$digest();
-						$timeout.flush();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					}));
 
@@ -247,8 +251,10 @@ describe('taBind.taReadOnly', function () {
 					it('should not update model from paste', inject(function ($timeout) {
 						element.html('<div>Test 2 Content</div>');
 						element.triggerHandler('paste');
+						expect(function(){
+							$timeout.flush();
+						}).toThrow();
 						$rootScope.$digest();
-						$timeout.flush();
 						expect($rootScope.html).toBe('<p>Test Contents</p>');
 					}));
 
@@ -357,10 +363,9 @@ describe('taBind.taReadOnly', function () {
 
 			describe('from keyup function', function () {
 				describe('on editable div', function () {
-					var $rootScope, element, $timeout;
-					beforeEach(inject(function (_$compile_, _$rootScope_, _$timeout_) {
+					var $rootScope, element;
+					beforeEach(inject(function (_$compile_, _$rootScope_) {
 						$rootScope = _$rootScope_;
-						$timeout = _$timeout_;
 						$rootScope.html = '<p>Test Contents</p>';
 						$rootScope.readonly = true;
 						element = _$compile_('<div ta-bind contenteditable="true" ta-readonly="readonly" ng-model="html"></div>')($rootScope);

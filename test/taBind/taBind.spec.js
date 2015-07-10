@@ -1,22 +1,17 @@
-var triggerKeyup;
+var triggerKeyup = function(element, options){
+	var event;
+	if(angular.element === jQuery){
+		event = jQuery.Event('keyup');
+		angular.extend(event, options);
+		element.triggerHandler(event);
+	}else{
+		element.triggerHandler('keyup', options);
+	}
+};
 
 describe('taBind', function () {
 	'use strict';
 	beforeEach(module('textAngular'));
-	beforeEach(inject(function($rootScope, $timeout){
-		triggerKeyup = function(element, options, skipTimeout){
-			var event;
-			if(angular.element === jQuery){
-				event = jQuery.Event('keyup');
-				angular.extend(event, options);
-				element.triggerHandler(event);
-			}else{
-				element.triggerHandler('keyup', options);
-			}
-			$rootScope.$digest();
-			if(!skipTimeout) $timeout.flush();
-		};
-	}));
 	afterEach(inject(function($document){
 		$document.find('body').html('');
 	}));
@@ -65,14 +60,6 @@ describe('taBind', function () {
 			$rootScope.$digest();
 			expect(element.html()).toBe('<div>Test 2 Content</div>');
 		});
-		it('should update display from model change while focussed', inject(function ($timeout) {
-			element.triggerHandler('focus');
-			$rootScope.$digest();
-			$rootScope.html = '<div>Test 2 Content</div>';
-			$rootScope.$digest();
-			$timeout.flush();
-			expect(element.html()).toBe('<div>Test 2 Content</div>');
-		}));
 		it('should wrap content from model change', function () {
 			$rootScope.html = 'Test 2 Content';
 			$rootScope.$digest();
@@ -218,7 +205,7 @@ describe('taBind', function () {
 					$window.rangy.getSelection().setSingleRange(range);
 
 					BLOCKED_KEYS.forEach(function(key) {
-						triggerKeyup(element, {keyCode: key}, true);
+						triggerKeyup(element, {keyCode: key});
 						$rootScope.$digest();
 						expect(eventSpy).not.toHaveBeenCalled();
 					});
@@ -506,12 +493,6 @@ describe('taBind', function () {
 			triggerKeyup(element, {keyCode: 70});
 			$rootScope.$digest();
 			expect($rootScope.html).toBe('<p>f</p>'); //but apparently it is just 'f'
-		});
-		it('should wrap inline tags and chars into a <p>-tag', function(){
-			element.html('<b>Test</b> Line 1');
-			triggerKeyup(element, {keyCode: 70});
-			$rootScope.$digest();
-			expect($rootScope.html).toBe('<p><b>Test</b> Line 1</p>');
 		});
 	});
 });
