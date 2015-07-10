@@ -15,14 +15,6 @@ describe('HTML', function() {
     };
   });
 
-  describe('$sanitize should provide hidden argument', function() {
-    it('version should be set to "taSanitize"', inject(function ($sanitize) {
-      var hidden = {};
-      $sanitize('', hidden);
-      expect(hidden.version==='taSanitize').toBe(true);
-    }));
-  });
-
   describe('htmlParser', function() {
     /* global htmlParser */
     if (angular.isUndefined(window.htmlParser)) return;
