@@ -147,7 +147,6 @@ function $SanitizeProvider() {
       htmlParser(html, htmlSanitizeWriter(buf, function(uri, isImage) {
         return !/^unsafe/.test($$sanitizeUri(uri, isImage));
       }));
-      console.log(buf.join(''));
       return buf.join('');
     };
   }];
