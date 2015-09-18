@@ -168,13 +168,11 @@ var START_TAG_REGEXP =
   BEGIN_TAG_REGEXP = /^</,
   BEGING_END_TAGE_REGEXP = /^<\//,
   COMMENT_REGEXP = /<!--(.*?)-->/g,
-  SINGLE_COMMENT_REGEXP = /(^<!--.*?-->)/,
   DOCTYPE_REGEXP = /<!DOCTYPE([^>]*?)>/i,
   CDATA_REGEXP = /<!\[CDATA\[(.*?)]]>/g,
   SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
   // Match everything outside of normal chars and " (quote character)
-  NON_ALPHANUMERIC_REGEXP = /([^\#-~| |!])/g,
-  WHITE_SPACE_REGEXP = /^(\s+)/;
+  NON_ALPHANUMERIC_REGEXP = /([^\#-~| |!])/g;
 
 
 // Good source of info about elements and attributes
@@ -290,23 +288,14 @@ function htmlParser(html, handler) {
     // Make sure we're not in a script or style element
     if (!stack.last() || !specialElements[ stack.last() ]) {
 
-      // White space
-      if (WHITE_SPACE_REGEXP.test(html)) {
-        match = html.match(WHITE_SPACE_REGEXP);
+      // Comment
+      if (html.indexOf("<!--") === 0) {
+        // comments containing -- are not allowed unless they terminate the comment
+        index = html.indexOf("--", 4);
 
-        if (match) {
-          var mat = match[0];
-          if (handler.whitespace) handler.whitespace(match[0]);
-          html = html.replace(match[0], '');
-          chars = false;
-        }
-      //Comment
-      } else if (SINGLE_COMMENT_REGEXP.test(html)) {
-        match = html.match(SINGLE_COMMENT_REGEXP);
-
-        if (match) {
-          if (handler.comment) handler.comment(match[1]);
-          html = html.replace(match[0], '');
+        if (index >= 0 && html.lastIndexOf("-->", index) === index) {
+          if (handler.comment) handler.comment(html.substring(4, index));
+          html = html.substring(index + 3);
           chars = false;
         }
       // DOCTYPE
@@ -597,12 +586,6 @@ function htmlSanitizeWriter(buf, uriValidator) {
         });
         out(unary ? '/>' : '>');
       }
-    },
-    comment: function (com) {
-      out(com);
-    },
-    whitespace: function (ws) {
-      out(encodeEntities(ws));
     },
     end: function(tag) {
         tag = angular.lowercase(tag);

@@ -17,7 +17,7 @@ module.exports = function (grunt) {
 
 	grunt.registerTask('compile', ['concat', 'copy:setupFiles', 'jshint', 'uglify']);
 	grunt.registerTask('default', ['compile', 'test']);
-	grunt.registerTask('test', ['clean:coverage', 'jshint', 'karma', 'coverage']);
+	grunt.registerTask('test', ['clean', 'jshint', 'karma', 'coverage']);
 	grunt.registerTask('travis-test', ['concat', 'copy:setupFiles', 'jshint', 'karma', 'coverage', 'coveralls']);
 
 	grunt.registerTask('release', ['bump-only','compile', 'demo_pages', 'changelog','gitcommit','bump-commit', 'shell:publish']);
@@ -78,18 +78,15 @@ module.exports = function (grunt) {
 				command: "npm publish"
 			}
 		},
-		clean: {
-            coverage: ["coverage"],
-            dist: ["dist"],
-        },
+		clean: ["coverage"],
 		coverage: {
 			options: {
-                thresholds: {
-                    'statements': 100,
-                    'branches': 100,
-                    'lines': 100,
-                    'functions': 100
-                },
+			thresholds: {
+				'statements': 100,
+				'branches': 100,
+				'lines': 100,
+				'functions': 100
+			},
 			dir: 'coverage'
 			}
 		},
@@ -136,10 +133,9 @@ module.exports = function (grunt) {
 				footer: "})();"
 			},
 			dist: {
-                files:{
-                    'dist/textAngular.js': ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
-                }
-			},
+				src: ['src/globals.js','src/factories.js','src/DOM.js','src/validators.js','src/taBind.js','src/main.js'],
+				dest: 'dist/textAngular.js'
+			}
 		},
 		uglify: {
 			options: {

@@ -168,54 +168,35 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 			var _blankTest = _taBlankTest(_defaultTest);
 
-			var _ensureContentWrapped = function(value) {
-				if (_blankTest(value)) return value;
+			var _ensureContentWrapped = function(value){
+				if(_blankTest(value)) return value;
 				var domTest = angular.element("<div>" + value + "</div>");
-				//console.log('domTest.children().length():', domTest.children().length);
-				if (domTest.children().length === 0) {
+				if(domTest.children().length === 0){
 					value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
-				} else {
+				}else{
 					var _children = domTest[0].childNodes;
 					var i;
 					var _foundBlockElement = false;
-					for (i = 0; i < _children.length; i++) {
-						if (_foundBlockElement = _children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)) break;
+					for(i = 0; i < _children.length; i++){
+						if(_foundBlockElement = _children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)) break;
 					}
-					if (!_foundBlockElement) {
+					if(!_foundBlockElement){
 						value = "<" + attrs.taDefaultWrap + ">" + value + "</" + attrs.taDefaultWrap + ">";
-					}
-					else{
+					}else{
 						value = "";
 						for(i = 0; i < _children.length; i++){
-							var node = _children[i];
-							var nodeName = node.nodeName.toLowerCase();
-							//console.log(nodeName);
-							if(nodeName === '#comment') {
-								value += '<!--' + node.nodeValue + '-->';
-							} else if(nodeName === '#text') {
-								// determine if this is all whitespace, if so, we will leave it as it is.
-								// otherwise, we will wrap it as it is
-								var text = node.textContent;
-								if (!text.trim()) {
-									// just whitespace
-									value += text;
-								} else {
-									// not pure white space so wrap in <p>...</p> or whatever attrs.taDefaultWrap is set to.
-									value += "<" + attrs.taDefaultWrap + ">" + text + "</" + attrs.taDefaultWrap + ">";
-								}
-							} else if(!nodeName.match(BLOCKELEMENTS)){
-								var _subVal = (node.outerHTML || node.nodeValue);
+							if(!_children[i].nodeName.toLowerCase().match(BLOCKELEMENTS)){
+								var _subVal = (_children[i].outerHTML || _children[i].nodeValue);
 								/* istanbul ignore else: Doesn't seem to trigger on tests, is tested though */
 								if(_subVal.trim() !== '')
 									value += "<" + attrs.taDefaultWrap + ">" + _subVal + "</" + attrs.taDefaultWrap + ">";
 								else value += _subVal;
-							} else {
-								value += node.outerHTML;
+							}else{
+								value += _children[i].outerHTML;
 							}
 						}
 					}
 				}
-				//console.log(value);
 				return value;
 			};
 
@@ -393,31 +374,16 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 
 					var recursiveListFormat = function(listNode, tablevel){
 						var _html = '', _children = listNode.childNodes;
-						var forEach = function (array, callback, scope) {
-							for (var i= 0; i<array.length; i++) {
-								callback.call(scope, i, array[i]);
-							}
-						};
 						tablevel++;
 						_html += _repeat('\t', tablevel-1) + listNode.outerHTML.substring(0, listNode.outerHTML.indexOf('<li'));
-						forEach(_children, function (index, node) {
+						for(var _i = 0; _i < _children.length; _i++){
 							/* istanbul ignore next: browser catch */
-							var nodeName = node.nodeName.toLowerCase();
-							//console.log(nodeName);
-							if (nodeName === '#comment') {
-								_html += '<!--' + node.nodeValue + '-->';
-								return;
-							}
-							if (nodeName === '#text') {
-								_html += node.textContent;
-								return;
-							}
-							if(!node.outerHTML) return;
-							if(nodeName === 'ul' || nodeName === 'ol')
-								_html += '\n' + recursiveListFormat(node, tablevel);
+							if(!_children[_i].outerHTML) continue;
+							if(_children[_i].nodeName.toLowerCase() === 'ul' || _children[_i].nodeName.toLowerCase() === 'ol')
+								_html += '\n' + recursiveListFormat(_children[_i], tablevel);
 							else
-								_html += '\n' + _repeat('\t', tablevel) + node.outerHTML;
-						});
+								_html += '\n' + _repeat('\t', tablevel) + _children[_i].outerHTML;
+						}
 						_html += '\n' + _repeat('\t', tablevel-1) + listNode.outerHTML.substring(listNode.outerHTML.lastIndexOf('<'));
 						return _html;
 					};
@@ -428,16 +394,6 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 							htmlValue = '';
 							for(var i = 0; i < _children.length; i++){
 								/* istanbul ignore next: browser catch */
-								var node = _children[i];
-								var nodeName = node.nodeName.toLowerCase();
-								if (nodeName === '#comment') {
-									htmlValue += '<!--' + node.nodeValue + '-->';
-									continue;
-								}
-								if (nodeName === '#text') {
-									htmlValue += node.textContent;
-									continue;
-								}
 								if(!_children[i].outerHTML) continue;
 								if(htmlValue.length > 0) htmlValue += '\n';
 								if(_children[i].nodeName.toLowerCase() === 'ul' || _children[i].nodeName.toLowerCase() === 'ol')
@@ -445,6 +401,7 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								else htmlValue += '' + _children[i].outerHTML;
 							}
 						}
+
 						return htmlValue;
 					});
 				}else{
@@ -756,13 +713,11 @@ angular.module('textAngular.taBind', ['textAngular.factories', 'textAngular.DOM'
 								_setInnerHTML(_defaultVal);
 								taSelection.setSelectionToElementStart(element.children()[0]);
 							}else if(val.substring(0, 1) !== '<' && attrs.taDefaultWrap !== ''){
-								/* we no longer do this, since there can be comments here and white space
 								var _savedSelection = $window.rangy.saveSelection();
 								val = _compileHtml();
 								val = "<" + attrs.taDefaultWrap + ">" + val + "</" + attrs.taDefaultWrap + ">";
 								_setInnerHTML(val);
 								$window.rangy.restoreSelection(_savedSelection);
-								*/
 							}
 							var triggerUndo = _lastKey !== event.keyCode && UNDO_TRIGGER_KEYS.test(event.keyCode);
 							if(_keyupTimeout) $timeout.cancel(_keyupTimeout);
