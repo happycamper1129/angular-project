@@ -229,11 +229,12 @@ angular.module('textAngular.DOM', ['textAngular.factories'])
 			}catch(e){}
 		};
 	};
-}]).service('taSelection', ['$document', 'taDOM',
+}]).service('taSelection', ['$window', '$document', 'taDOM',
 /* istanbul ignore next: all browser specifics and PhantomJS dosen't seem to support half of it */
-function($document, taDOM){
+function($window, $document, taDOM){
 	// need to dereference the document else the calls don't work correctly
 	var _document = $document[0];
+	var rangy = $window.rangy;
 	var brException = function (element, offset) {
 		/* check if selection is a BR element at the beginning of a container. If so, get
 		* the parentNode instead.
